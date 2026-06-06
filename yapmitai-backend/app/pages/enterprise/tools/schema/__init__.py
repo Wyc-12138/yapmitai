@@ -1,3 +1,5 @@
-from app.schemas.tools import ToolToggle
+from pydantic import BaseModel
 
-__all__ = ["ToolToggle"]
+
+class ToolToggle(BaseModel):
+    enabled: bool

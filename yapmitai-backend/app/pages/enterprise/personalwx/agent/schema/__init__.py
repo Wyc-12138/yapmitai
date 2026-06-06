@@ -1,3 +1,7 @@
-from app.schemas.personalwx import PersonalWxMessage
+from pydantic import BaseModel
 
-__all__ = ["PersonalWxMessage"]
+
+class PersonalWxMessage(BaseModel):
+    contact_id: str
+    content: str
+    takeover_mode: str = "assisted"

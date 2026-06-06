@@ -1,3 +1,5 @@
-from app.schemas.government import PolicyQuestion
+from pydantic import BaseModel
 
-__all__ = ["PolicyQuestion"]
+
+class PolicyQuestion(BaseModel):
+    question: str

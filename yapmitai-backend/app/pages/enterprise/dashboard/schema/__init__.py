@@ -1,3 +1,9 @@
-from app.schemas.dashboard import DashboardOverview
+from pydantic import BaseModel
 
-__all__ = ["DashboardOverview"]
+
+class DashboardOverview(BaseModel):
+    kpis: list[dict]
+    sales_trend: list[dict]
+    task_distribution: list[dict]
+    tasks: list[dict]
+    gateway_stats: dict

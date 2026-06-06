@@ -1,3 +1,9 @@
-from app.services.personalwx import reply
+from app.shared.gateway import gateway_service
 
-__all__ = ["reply"]
+
+async def reply(payload: dict) -> dict:
+    return await gateway_service.call(
+        "cs-personalwx",
+        payload,
+        {"reply": f"已收到：{payload['content']}", "takeoverMode": payload["takeover_mode"]},
+    )

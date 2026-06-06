@@ -1,3 +1,6 @@
-from app.schemas.talent import TalentAssistantRequest
+from pydantic import BaseModel
 
-__all__ = ["TalentAssistantRequest"]
+
+class TalentAssistantRequest(BaseModel):
+    assistant: str
+    prompt: str

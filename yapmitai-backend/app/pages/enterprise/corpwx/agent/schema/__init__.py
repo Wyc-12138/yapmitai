@@ -1,3 +1,8 @@
-from app.schemas.corpwx import CorpWxMessage
+from pydantic import BaseModel
 
-__all__ = ["CorpWxMessage"]
+
+class CorpWxMessage(BaseModel):
+    contact_id: str
+    department: str
+    content: str
+    takeover_mode: str = "managed"

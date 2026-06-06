@@ -1,3 +1,6 @@
-from app.schemas.logs import LogFilter
+from pydantic import BaseModel
 
-__all__ = ["LogFilter"]
+
+class LogFilter(BaseModel):
+    module: str | None = None
+    status: str | None = None

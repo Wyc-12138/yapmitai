@@ -1,3 +1,38 @@
-from app.routers.agent_config import router
+from fastapi import APIRouter, HTTPException
 
-__all__ = ["router"]
+from app.core.responses import success
+from .. import service
+from ..schema import GatewayConfigUpdate, ModuleConfigUpdate
+
+router = APIRouter(prefix="/agent-config", tags=["agent-config"])
+
+
+@router.get("/gateway")
+async def get_gateway_config() -> dict:
+    return success(service.get_gateway_config())
+
+
+@router.put("/gateway")
+async def update_gateway_config(payload: GatewayConfigUpdate) -> dict:
+    return success(service.update_gateway_config(payload.model_dump()))
+
+
+@router.post("/connection-test")
+async def test_connection() -> dict:
+    return success(service.test_connection())
+
+
+@router.get("/modules/{module}")
+async def get_module_config(module: str) -> dict:
+    config = service.get_module_config(module)
+    if not config:
+        raise HTTPException(status_code=404, detail="Module config not found")
+    return success(config)
+
+
+@router.put("/modules/{module}")
+async def update_module_config(module: str, payload: ModuleConfigUpdate) -> dict:
+    config = service.update_module_config(module, payload.model_dump())
+    if not config:
+        raise HTTPException(status_code=404, detail="Module config not found")
+    return success(config)

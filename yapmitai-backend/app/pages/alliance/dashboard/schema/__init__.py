@@ -1,3 +1,7 @@
-from app.schemas.alliance import AllianceMemberCreate
+from pydantic import BaseModel, Field
 
-__all__ = ["AllianceMemberCreate"]
+
+class AllianceMemberCreate(BaseModel):
+    name: str = Field(min_length=2)
+    enterprise_type: str
+    ai_level: str = "L1"
