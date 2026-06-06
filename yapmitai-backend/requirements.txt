@@ -1,0 +1,13 @@
+# ChromaDB 1.0.12 requires this exact FastAPI version.
+fastapi==0.115.9
+uvicorn[standard]==0.34.3
+pydantic-settings==2.9.1
+sqlalchemy==2.0.41
+alembic==1.16.1
+asyncpg==0.30.0
+redis==6.2.0
+httpx==0.28.1
+chromadb==1.0.12
+python-multipart==0.0.20
+pytest==8.4.0
+pytest-asyncio==1.0.0

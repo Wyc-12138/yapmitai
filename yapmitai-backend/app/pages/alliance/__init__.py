@@ -1,0 +1,1 @@
+"""Alliance frontend route modules."""

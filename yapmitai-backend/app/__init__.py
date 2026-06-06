@@ -1,0 +1,1 @@
+"""YAPMITAI backend application."""

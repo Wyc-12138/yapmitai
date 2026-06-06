@@ -1,0 +1,1 @@
+"""Talent frontend route modules."""
