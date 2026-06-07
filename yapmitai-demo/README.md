@@ -111,6 +111,8 @@ Agent Gateway 前端接口封装。联调时在这里加入 HTTP 请求和 API K
 
 ## 启动
 
+完整步骤见 [`FRONTEND_STARTUP.md`](FRONTEND_STARTUP.md)。
+
 ```powershell
 cd F:\code\YP\yapmitai-demo
 npm.cmd run dev

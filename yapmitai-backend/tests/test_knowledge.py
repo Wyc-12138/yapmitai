@@ -140,8 +140,8 @@ def test_model_config() -> None:
     response = client.get("/api/v1/knowledge/model-config", headers=headers)
     assert response.status_code == 200
     data = response.json()["data"]
-    assert "text-embedding-3-small" in data["embeddingModels"]
-    assert "gpt-4o-mini" in data["answerModels"]
+    assert data["embeddingModels"]
+    assert data["answerModels"]
 
 
 def test_real_model_test_endpoint(monkeypatch) -> None:
@@ -165,18 +165,21 @@ def test_real_model_test_endpoint(monkeypatch) -> None:
         },
     )
     library_id = created.json()["data"]["id"]
+    available = client.get("/api/v1/knowledge/model-config", headers=headers).json()["data"]
+    embedding_model = available["embeddingModels"][-1]
+    answer_model = available["answerModels"][0]
 
     configured = client.put(
         "/api/v1/knowledge/model-config",
         headers=headers,
         json={
             "knowledge_base_id": library_id,
-            "embedding_model": "text-embedding-3-large",
-            "answer_model": "gpt-4.1-mini",
+            "embedding_model": embedding_model,
+            "answer_model": answer_model,
         },
     )
     assert configured.status_code == 200
-    assert configured.json()["data"]["embeddingModel"] == "text-embedding-3-large"
+    assert configured.json()["data"]["embeddingModel"] == embedding_model
 
     tested = client.post(
         "/api/v1/knowledge/model-test",

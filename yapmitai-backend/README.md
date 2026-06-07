@@ -226,6 +226,11 @@ ANSWER_MODELS=gpt-4o-mini,gpt-4.1-mini
 
 ## 启动
 
+完整步骤见：
+
+- [`BACKEND_STARTUP.md`](BACKEND_STARTUP.md)
+- [`POSTGRESQL_SETUP.md`](POSTGRESQL_SETUP.md)
+
 ```powershell
 cd F:\code\YP\yapmitai-backend
 python -m venv .venv
