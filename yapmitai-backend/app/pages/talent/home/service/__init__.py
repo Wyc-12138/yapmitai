@@ -1,4 +1,4 @@
-def get_home() -> dict:
+async def get_home(_db) -> dict:
     return {
         "assistants": ["简历优化助手", "技能学习助手", "任务总结助手", "政策咨询助手"],
         "weeklyTasks": 18,
@@ -6,5 +6,5 @@ def get_home() -> dict:
     }
 
 
-def call_assistant(assistant: str, prompt: str) -> dict:
+async def call_assistant(_db, assistant: str, prompt: str) -> dict:
     return {"assistant": assistant, "prompt": prompt, "result": f"{assistant}已完成处理。"}

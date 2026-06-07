@@ -15,3 +15,7 @@ class AgentToggle(BaseModel):
 
 class GlobalToggle(BaseModel):
     enabled: bool
+
+
+class AgentKnowledgeBaseUpdate(BaseModel):
+    knowledge_base_ids: list[str] = Field(default_factory=list)

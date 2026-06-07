@@ -1,22 +1,11 @@
 import time
-from dataclasses import asdict, dataclass
 from datetime import UTC, datetime
 
 from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware
 
-
-@dataclass
-class CallLog:
-    request_at: str
-    response_at: str
-    path: str
-    method: str
-    status: str
-    latency_ms: int
-
-
-CALL_LOG_STORE: list[dict] = []
+from app.db.postgres import AsyncSessionLocal
+from app.models import AgentCallLog
 
 
 class CallLoggingMiddleware(BaseHTTPMiddleware):
@@ -26,15 +15,22 @@ class CallLoggingMiddleware(BaseHTTPMiddleware):
         response = await call_next(request)
         latency_ms = round((time.perf_counter() - started) * 1000)
         if "/api/v1/" in request.url.path:
-            item = CallLog(
-                request_at=started_at.isoformat(),
-                response_at=datetime.now(UTC).isoformat(),
-                path=request.url.path,
-                method=request.method,
-                status="success" if response.status_code < 400 else "failed",
-                latency_ms=latency_ms,
-            )
-            CALL_LOG_STORE.insert(0, asdict(item))
-            del CALL_LOG_STORE[200:]
+            path_parts = request.url.path.split("/")
+            module = path_parts[3] if len(path_parts) > 3 else "system"
+            async with AsyncSessionLocal() as session:
+                session.add(
+                    AgentCallLog(
+                        agent_id="http-api",
+                        module=module,
+                        path=request.url.path,
+                        method=request.method,
+                        request_at=started_at,
+                        response_at=datetime.now(UTC),
+                        status="success" if response.status_code < 400 else "failed",
+                        latency_ms=latency_ms,
+                        cost=0,
+                    )
+                )
+                await session.commit()
         response.headers["X-Trace-Latency-Ms"] = str(latency_ms)
         return response

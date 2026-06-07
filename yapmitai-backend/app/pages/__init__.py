@@ -8,6 +8,7 @@ from app.pages.enterprise.corpwx.agent.router import router as corpwx_agent_rout
 from app.pages.enterprise.creation.agent.router import router as creation_agent_router
 from app.pages.enterprise.dashboard.router import router as enterprise_dashboard_router
 from app.pages.enterprise.knowledge.agent.router import router as knowledge_agent_router
+from app.pages.enterprise.model_configs.router import router as model_configs_router
 from app.pages.enterprise.outreach.agent.router import router as outreach_agent_router
 from app.pages.enterprise.personalwx.agent.router import router as personalwx_agent_router
 from app.pages.enterprise.tools.agent_config.router import router as agent_config_router
@@ -26,6 +27,7 @@ api_router.include_router(outreach_agent_router)
 api_router.include_router(personalwx_agent_router)
 api_router.include_router(corpwx_agent_router)
 api_router.include_router(knowledge_agent_router)
+api_router.include_router(model_configs_router)
 api_router.include_router(agent_logs_router)
 api_router.include_router(talent_home_router)
 api_router.include_router(government_dashboard_router)

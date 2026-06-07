@@ -10,11 +10,16 @@ class AgentCallLog(Base):
     __tablename__ = "agent_call_logs"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    agent_id: Mapped[str] = mapped_column(String(100), index=True)
-    module: Mapped[str] = mapped_column(String(100), index=True)
+    agent_id: Mapped[str | None] = mapped_column(String(100), index=True)
+    module: Mapped[str] = mapped_column(String(100), default="system", index=True)
+    path: Mapped[str] = mapped_column(String(500), default="")
+    method: Mapped[str] = mapped_column(String(20), default="GET")
     request_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     response_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     status: Mapped[str] = mapped_column(String(30), index=True)
     latency_ms: Mapped[int] = mapped_column(Integer, default=0)
     cost: Mapped[float] = mapped_column(Float, default=0)
+    prompt_tokens: Mapped[int] = mapped_column(Integer, default=0)
+    completion_tokens: Mapped[int] = mapped_column(Integer, default=0)
+    total_tokens: Mapped[int] = mapped_column(Integer, default=0)
     error_msg: Mapped[str | None] = mapped_column(Text)

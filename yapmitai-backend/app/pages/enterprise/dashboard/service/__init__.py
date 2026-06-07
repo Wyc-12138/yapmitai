@@ -1,7 +1,7 @@
 from app.shared.mock_data import ENTERPRISE_KPIS, SALES_TREND, TASKS
 
 
-def get_overview() -> dict:
+async def get_overview(_db) -> dict:
     return {
         "kpis": ENTERPRISE_KPIS,
         "salesTrend": SALES_TREND,

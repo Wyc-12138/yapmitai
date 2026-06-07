@@ -8,6 +8,11 @@ from app.core.responses import failure
 
 class ApiKeyMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
+        # Browser CORS preflight requests do not carry application credentials.
+        # Let CORSMiddleware validate and answer them before enforcing API keys.
+        if request.method == "OPTIONS":
+            return await call_next(request)
+
         protected_prefix = get_settings().api_v1_prefix
         if request.url.path.startswith(protected_prefix):
             supplied_key = request.headers.get("X-API-Key")

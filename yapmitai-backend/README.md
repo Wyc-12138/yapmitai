@@ -1,6 +1,8 @@
 # 悦普 AI 后端
 
-技术栈：Python 3.12、FastAPI、Pydantic、SQLAlchemy、PostgreSQL、Redis、ChromaDB、Pytest、Docker Compose。
+技术栈：Python 3.12、FastAPI、Pydantic、SQLAlchemy、PostgreSQL、Redis、ChromaDB（本地持久化）、Pytest、Docker Compose。
+
+数据库使用 8 张业务表，完整结构见 [`DATABASE.md`](DATABASE.md)。
 
 ## 目录结构
 
@@ -49,7 +51,7 @@ Python 包名不能包含连字符，因此前端的 `agent-config`、`agent-log
 - `.env.example`：环境变量模板。
 - `.gitignore`：排除密钥、虚拟环境和缓存。
 - `Dockerfile`：构建 FastAPI 镜像。
-- `docker-compose.yml`：编排 API、PostgreSQL、Redis、ChromaDB。
+- `docker-compose.yml`：编排 API、PostgreSQL 和 Redis；Chroma 随 API 使用本地持久化目录。
 - `pyproject.toml`：Pytest 和 Ruff 配置。
 
 ## 公共文件
@@ -57,6 +59,7 @@ Python 包名不能包含连字符，因此前端的 `agent-config`、`agent-log
 - `app/main.py`：创建 FastAPI、配置 CORS、中间件、异常处理和 `/health`。
 - `app/pages/__init__.py`：唯一业务总路由入口。
 - `app/shared/gateway.py`：调用 Agent Gateway，处理超时和 Mock fallback。
+- `app/shared/external_ai.py`：调用外部 OpenAI 兼容 Embedding、Chat 和图片理解 API。
 - `app/shared/mock_data.py`：跨页面共享的 Demo 数据。
 - `app/shared/schema.py`：统一响应、分页、开关和通用 Agent 参数。
 - `app/core/config.py`：环境变量配置。
@@ -64,7 +67,7 @@ Python 包名不能包含连字符，因此前端的 `agent-config`、`agent-log
 - `app/core/exceptions.py`：业务错误码。
 - `app/db/postgres.py`：SQLAlchemy 异步数据库会话。
 - `app/db/redis.py`：异步 Redis 客户端。
-- `app/db/chroma.py`：ChromaDB 客户端。
+- `app/db/chroma.py`：Chroma 本地持久化客户端，保存文档切片和 Embedding 向量。
 - `app/middleware/auth.py`：`X-API-Key` 鉴权。
 - `app/middleware/call_logging.py`：调用日志中间件。
 - `app/models/base.py`：SQLAlchemy 模型基类。
@@ -128,9 +131,62 @@ Python 包名不能包含连字符，因此前端的 `agent-config`、`agent-log
 
 ### `app/pages/enterprise/knowledge/agent`
 
-- Router：同步、同步状态、知识库状态、查询
-- Service：同步任务和合并检索
-- Schema：同步来源和查询参数
+- Router：外部向量库同步、本地知识库 CRUD、集合上传和知识查询
+- Service：同步任务、本地知识库管理和合并检索
+- Schema：同步来源、查询、本地知识库创建和更新参数
+
+本地知识库接口：
+
+```text
+GET    /api/v1/knowledge/local-libraries
+POST   /api/v1/knowledge/local-libraries
+GET    /api/v1/knowledge/local-libraries/{library_id}
+PATCH  /api/v1/knowledge/local-libraries/{library_id}
+DELETE /api/v1/knowledge/local-libraries/{library_id}
+POST   /api/v1/knowledge/local-libraries/{library_id}/collections
+```
+
+模型配置接口：
+
+```text
+GET /api/v1/knowledge/model-config
+PUT /api/v1/knowledge/model-config
+```
+
+外部模型环境变量：
+
+```text
+EXTERNAL_AI_BASE_URL=https://api.openai.com/v1
+EXTERNAL_AI_API_KEY=
+EMBEDDING_MODELS=text-embedding-3-small,text-embedding-3-large
+ANSWER_MODELS=gpt-4o-mini,gpt-4.1-mini
+```
+
+模型按钮会真实调用 `EXTERNAL_AI_BASE_URL` 提供的 OpenAI 兼容
+`/embeddings` 和 `/chat/completions` 接口，不使用本地模拟结果。必须在
+`.env` 填写真实的 `EXTERNAL_AI_API_KEY` 并重启后端。
+
+企业智库页面可针对具体本地知识库保存模型配置，并执行“测试 Embedding +
+回答模型”。成功时会显示向量维度、真实回答和 Token，失败时显示上游 API
+返回的错误。
+
+文本上传流程：
+
+```text
+文本提取 → 500 字符切分 → 50 字符重叠 → 外部 Embedding API
+```
+
+图片上传流程：
+
+```text
+外部多模态回答模型生成图片描述 → 外部 Embedding API
+```
+
+问答流程：
+
+```text
+知识检索上下文 → 外部回答模型生成答案
+```
 
 ### `app/pages/talent/home`
 

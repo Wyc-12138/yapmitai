@@ -5,6 +5,7 @@ import corpwxAgent from "../pages/enterprise/corpwx/agent/index.js";
 import creationAgent from "../pages/enterprise/creation/agent/index.js";
 import enterpriseDashboard from "../pages/enterprise/dashboard/index.js";
 import knowledgeAgent from "../pages/enterprise/knowledge/agent/index.js";
+import modelConfigs from "../pages/enterprise/model-configs/index.js";
 import outreachAgent from "../pages/enterprise/outreach/agent/index.js";
 import personalwxAgent from "../pages/enterprise/personalwx/agent/index.js";
 import enterpriseTools from "../pages/enterprise/tools/index.js";
@@ -25,6 +26,7 @@ export const routes = [
   personalwxAgent,
   corpwxAgent,
   knowledgeAgent,
+  modelConfigs,
   talentHome,
   governmentDashboard,
   allianceDashboard

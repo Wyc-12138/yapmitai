@@ -1,3 +1,5 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
@@ -10,13 +12,21 @@ from app.core.responses import failure, success
 from app.middleware.auth import ApiKeyMiddleware
 from app.middleware.call_logging import CallLoggingMiddleware
 from app.pages import api_router
+from app.db.postgres import init_database
 
 settings = get_settings()
+
+
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    await init_database()
+    yield
 
 app = FastAPI(
     title=settings.app_name,
     version="1.0.0",
     description="YAPMITAI Demo 2.0 Agent Gateway backend",
+    lifespan=lifespan,
 )
 app.add_middleware(
     CORSMiddleware,
