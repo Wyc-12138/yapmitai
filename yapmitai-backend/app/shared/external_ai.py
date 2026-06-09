@@ -135,6 +135,43 @@ class ExternalAIService:
             "usage": data.get("usage", {}),
         }
 
+    async def generate_with_config(
+        self,
+        system_prompt: str,
+        user_prompt: str,
+        config: ModelConfig,
+    ) -> dict[str, Any]:
+        if config.model_type != "chat":
+            raise InvalidParameterError("Model config is not a chat model")
+        if not config.enabled:
+            raise InvalidParameterError("Model config is disabled")
+        api_key = decrypt_api_key(config.api_key_encrypted)
+        if not api_key:
+            raise AgentUnavailableError(
+                f"Chat model '{config.display_name}' API key is not configured"
+            )
+        payload = {
+            "model": config.model_code,
+            "temperature": config.default_temperature if config.default_temperature is not None else 0.2,
+            "messages": [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt},
+            ],
+        }
+        if config.max_output_tokens:
+            payload["max_tokens"] = config.max_output_tokens
+        data = await self._post(
+            "/chat/completions",
+            payload,
+            api_base_url=config.api_base_url,
+            api_key=api_key,
+        )
+        return {
+            "answer": data["choices"][0]["message"]["content"],
+            "model": config.model_code,
+            "usage": data.get("usage", {}),
+        }
+
     async def describe_image(
         self,
         content: bytes,

@@ -75,6 +75,15 @@ async def init_database() -> None:
             )
         )
         await connection.run_sync(Base.metadata.create_all)
+        for statement in (
+            "ALTER TABLE ai_tools ADD COLUMN IF NOT EXISTS model_config_id INTEGER",
+            "ALTER TABLE ai_tools ADD COLUMN IF NOT EXISTS input_schema JSONB",
+            "ALTER TABLE ai_tools ADD COLUMN IF NOT EXISTS output_schema JSONB",
+            "ALTER TABLE ai_tools ADD COLUMN IF NOT EXISTS call_count INTEGER NOT NULL DEFAULT 0",
+            "ALTER TABLE ai_tools ADD COLUMN IF NOT EXISTS sort_order INTEGER NOT NULL DEFAULT 0",
+            "ALTER TABLE ai_tools ADD COLUMN IF NOT EXISTS is_system BOOLEAN NOT NULL DEFAULT FALSE",
+        ):
+            await connection.execute(text(statement))
         await connection.execute(
             text(
                 """

@@ -3,11 +3,19 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "scripts": {
-    "dev": "node server.js",
-    "build": "node build.js",
-    "preview": "node server.js"
+  "engines": {
+    "node": ">22"
   },
-  "dependencies": {},
-  "devDependencies": {}
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "vue": "^3.5.16",
+    "vue-router": "^4.5.1"
+  },
+  "devDependencies": {
+    "vite": "^6.3.5"
+  }
 }

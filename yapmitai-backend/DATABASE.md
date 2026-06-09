@@ -1,6 +1,6 @@
 # 数据存储说明
 
-## PostgreSQL：8 张业务表
+## PostgreSQL：10 张业务表
 
 | 表名 | 用途 |
 |---|---|
@@ -12,8 +12,10 @@
 | `conversations` | 一次对话会话及标题 |
 | `messages` | 会话中的用户问题、AI 回答、模型与引用来源 |
 | `agent_call_logs` | 模型/API 调用、Token、耗时、费用和异常 |
+| `ai_tools` | Prompt Skill 工具定义、模型配置和展示信息 |
+| `skill_run_records` | AI工具运行结果历史 |
 
-后端启动时会删除上一版多余表，再自动创建以上 8 张表并初始化 Agent 和模型配置数据。
+后端启动时会删除上一版多余表，再自动创建以上 10 张表并初始化 Agent、模型配置和AI工具数据。
 
 模型配置关系：
 

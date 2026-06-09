@@ -1,6 +1,7 @@
 from io import BytesIO
 from datetime import UTC, datetime
 from pathlib import Path
+from tempfile import gettempdir
 from uuid import uuid4
 from xml.etree import ElementTree
 from zipfile import BadZipFile, ZipFile
@@ -340,7 +341,11 @@ async def add_document(
         return None
     document_id = f"document-{uuid4().hex[:10]}"
     directory = Path(settings.knowledge_storage_dir) / library_id
-    directory.mkdir(parents=True, exist_ok=True)
+    try:
+        directory.mkdir(parents=True, exist_ok=True)
+    except PermissionError:
+        directory = Path(gettempdir()) / "yapmitai" / "knowledge" / library_id
+        directory.mkdir(parents=True, exist_ok=True)
     safe_name = Path(filename).name
     storage_path = directory / f"{document_id}-{safe_name}"
     storage_path.write_bytes(content)

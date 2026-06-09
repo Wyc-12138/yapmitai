@@ -14,6 +14,7 @@ from sqlalchemy import (
     UniqueConstraint,
     func,
 )
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base
@@ -105,6 +106,54 @@ class KnowledgeBase(Base):
     embedding_model_config: Mapped[ModelConfig | None] = relationship(
         foreign_keys=[embedding_model_config_id]
     )
+
+
+class AiTool(Base):
+    __tablename__ = "ai_tools"
+    __table_args__ = (
+        UniqueConstraint("code", name="uq_ai_tools_code"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    name: Mapped[str] = mapped_column(String(100))
+    name_en: Mapped[str | None] = mapped_column(String(150))
+    code: Mapped[str] = mapped_column(String(80), index=True)
+    category: Mapped[str] = mapped_column(String(50), index=True)
+    description: Mapped[str | None] = mapped_column(Text)
+    icon: Mapped[str | None] = mapped_column(String(100))
+    model_config_id: Mapped[int | None] = mapped_column(
+        ForeignKey("model_configs.id", ondelete="SET NULL"), nullable=True, index=True
+    )
+    prompt_template: Mapped[str] = mapped_column(Text)
+    input_schema: Mapped[dict[str, Any] | None] = mapped_column(JSONB)
+    output_schema: Mapped[dict[str, Any] | None] = mapped_column(JSONB)
+    enabled: Mapped[bool] = mapped_column(Boolean, default=True, index=True)
+    is_system: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
+    call_count: Mapped[int] = mapped_column(Integer, default=0)
+    sort_order: Mapped[int] = mapped_column(Integer, default=0, index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+    model_config: Mapped[ModelConfig | None] = relationship(foreign_keys=[model_config_id])
+    run_records: Mapped[list["SkillRunRecord"]] = relationship(
+        back_populates="skill", cascade="all, delete-orphan", passive_deletes=True
+    )
+
+
+class SkillRunRecord(Base):
+    __tablename__ = "skill_run_records"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    skill_id: Mapped[int] = mapped_column(
+        ForeignKey("ai_tools.id", ondelete="CASCADE"), index=True
+    )
+    title: Mapped[str] = mapped_column(String(150))
+    target: Mapped[str | None] = mapped_column(String(200))
+    suggested_action: Mapped[str | None] = mapped_column(Text)
+    deliverables: Mapped[str | None] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    skill: Mapped[AiTool] = relationship(back_populates="run_records")
 
 
 class KnowledgeDocument(Base):

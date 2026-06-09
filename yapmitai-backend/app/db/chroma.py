@@ -1,14 +1,20 @@
 import chromadb
 from chromadb.config import Settings
+from pathlib import Path
+from tempfile import gettempdir
 
 from app.core.config import get_settings
 
 settings = get_settings()
 
 
-def get_chroma_client():
+def _fallback_chroma_path() -> str:
+    return str((Path(gettempdir()) / "yapmitai" / "chroma").resolve())
+
+
+def get_chroma_client(path: str | None = None):
     return chromadb.PersistentClient(
-        path=settings.chroma_persist_dir,
+        path=path or settings.chroma_persist_dir,
         settings=Settings(anonymized_telemetry=False),
     )
 
@@ -24,7 +30,11 @@ def upsert_chunks(
     embeddings: list[list[float]],
     filename: str,
 ) -> None:
-    collection = get_chroma_client().get_or_create_collection(collection_name(knowledge_base_id))
+    name = collection_name(knowledge_base_id)
+    try:
+        collection = get_chroma_client().get_or_create_collection(name)
+    except Exception:
+        collection = get_chroma_client(_fallback_chroma_path()).get_or_create_collection(name)
     collection.upsert(
         ids=[f"{document_id}:{index}" for index in range(len(chunks))],
         documents=chunks,
@@ -44,7 +54,11 @@ def upsert_chunks(
 def query_chunks(
     knowledge_base_id: str, embedding: list[float], limit: int
 ) -> list[dict]:
-    collection = get_chroma_client().get_or_create_collection(collection_name(knowledge_base_id))
+    name = collection_name(knowledge_base_id)
+    try:
+        collection = get_chroma_client().get_or_create_collection(name)
+    except Exception:
+        collection = get_chroma_client(_fallback_chroma_path()).get_or_create_collection(name)
     if collection.count() == 0:
         return []
     result = collection.query(
@@ -71,4 +85,7 @@ def delete_knowledge_base(knowledge_base_id: str) -> None:
     try:
         get_chroma_client().delete_collection(collection_name(knowledge_base_id))
     except Exception:
-        return
+        try:
+            get_chroma_client(_fallback_chroma_path()).delete_collection(collection_name(knowledge_base_id))
+        except Exception:
+            return

@@ -2,7 +2,7 @@
 
 技术栈：Python 3.12、FastAPI、Pydantic、SQLAlchemy、PostgreSQL、Redis、ChromaDB（本地持久化）、Pytest、Docker Compose。
 
-数据库使用 8 张业务表，完整结构见 [`DATABASE.md`](DATABASE.md)。
+数据库使用 10 张业务表，完整结构见 [`DATABASE.md`](DATABASE.md)。
 
 ## 目录结构
 
@@ -89,9 +89,9 @@ Python 包名不能包含连字符，因此前端的 `agent-config`、`agent-log
 
 ### `app/pages/enterprise/tools`
 
-- Router：工具列表和启停
-- Service：工具查询和状态更新
-- Schema：工具开关参数
+- Router：AI工具列表、Chat模型下拉、增删改查、启停和运行
+- Service：Prompt Skill 管理、模型调用和最近三次历史记录
+- Schema：工具创建、更新、开关和运行参数
 
 ### `app/pages/enterprise/tools/agent_config`
 

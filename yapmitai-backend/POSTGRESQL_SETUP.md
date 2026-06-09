@@ -49,7 +49,7 @@ DATABASE_URL=postgresql+asyncpg://yapmitai:yapmitai@localhost:5432/yapmitai
 python -m uvicorn app.main:app --reload --port 8000
 ```
 
-后端会自动创建、迁移并初始化以下 8 张表：
+后端会自动创建、迁移并初始化以下 10 张表：
 
 | 表名 | 用途 |
 |---|---|
@@ -61,6 +61,8 @@ python -m uvicorn app.main:app --reload --port 8000
 | `conversations` | 对话会话 |
 | `messages` | 会话消息和知识引用 |
 | `agent_call_logs` | API与模型调用日志 |
+| `ai_tools` | Prompt Skill工具定义和模型配置 |
+| `skill_run_records` | AI工具最近运行结果历史 |
 
 ## 4. 添加中文表和字段备注
 

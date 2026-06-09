@@ -3,7 +3,7 @@
 ## 1. 环境要求
 
 - Windows 10/11
-- Node.js 18 或更高版本
+- Node.js 版本必须大于 22（推荐 Node.js 24 LTS）
 - 后端默认运行在 `http://localhost:8000`
 
 检查 Node.js：
@@ -21,16 +21,22 @@ cd F:\code\YP\yapmitai-demo
 
 ## 3. 启动前端
 
-本项目没有第三方前端依赖，直接执行：
+首次启动先安装 Vue 3、Vue Router 和 Vite 依赖：
+
+```powershell
+npm.cmd install
+```
+
+然后启动 Vite 开发服务器：
 
 ```powershell
 npm.cmd run dev
 ```
 
-看到以下内容表示启动成功：
+看到 Vite 输出本地地址表示启动成功：
 
 ```text
-YAPMITAI demo is running at http://localhost:5173
+Local: http://localhost:5173/
 ```
 
 浏览器访问：
@@ -88,7 +94,13 @@ npm.cmd run dev
 npm.cmd run build
 ```
 
-该命令用于检查页面路由和静态前端结构，不会生成传统框架的 `dist` 目录。
+该命令会使用 Vite 编译 Vue 3 应用，并生成 `dist` 生产目录。
+
+构建完成后可执行：
+
+```powershell
+npm.cmd run preview
+```
 
 ## 7. 常见问题
 

@@ -76,7 +76,7 @@ python -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 后端启动时会：
 
 1. 连接 PostgreSQL。
-2. 创建或迁移 8 张业务表。
+2. 创建或迁移 10 张业务表。
 3. 初始化默认智能体和模型配置。
 4. 初始化本地 Chroma 持久化目录。
 
