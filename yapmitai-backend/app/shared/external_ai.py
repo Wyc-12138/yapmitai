@@ -250,7 +250,7 @@ class ExternalAIService:
         api_base_url: str | None = None,
         api_key: str | None = None,
     ) -> dict[str, Any]:
-        from app.db.postgres import AsyncSessionLocal
+        from app.db.database import AsyncSessionLocal
         from app.models import AgentCallLog
 
         url = f"{(api_base_url or self.settings.external_ai_base_url).rstrip('/')}{path}"

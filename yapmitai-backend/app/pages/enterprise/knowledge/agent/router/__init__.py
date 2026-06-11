@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.responses import success
 from app.core.exceptions import InvalidParameterError
-from app.db.postgres import get_db
+from app.db.database import get_db
 from .. import service
 from ..schema import (
     KnowledgeQuery,

@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.responses import success
-from app.db.postgres import get_db
+from app.db.database import get_db
 from app.shared.gateway import gateway_service
 from app.shared.schema import AgentCallRequest
 

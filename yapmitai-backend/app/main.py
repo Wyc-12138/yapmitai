@@ -12,7 +12,7 @@ from app.core.responses import failure, success
 from app.middleware.auth import ApiKeyMiddleware
 from app.middleware.call_logging import CallLoggingMiddleware
 from app.pages import api_router
-from app.db.postgres import init_database
+from app.db.database import init_database
 
 settings = get_settings()
 

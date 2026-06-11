@@ -6,11 +6,11 @@ services:
     env_file:
       - .env
     environment:
-      DATABASE_URL: postgresql+asyncpg://yapmitai:yapmitai@postgres:5432/yapmitai
+      DATABASE_URL: mysql+aiomysql://yapmitai:yapmitai@mysql:3306/yapmitai?charset=utf8mb4
       REDIS_URL: redis://redis:6379/0
       CHROMA_PERSIST_DIR: /app/storage/chroma
     depends_on:
-      postgres:
+      mysql:
         condition: service_healthy
       redis:
         condition: service_healthy
@@ -18,21 +18,22 @@ services:
       - ./app:/app/app
       - chroma_data:/app/storage/chroma
 
-  postgres:
-    image: postgres:16-alpine
+  mysql:
+    image: mysql:8.4
     environment:
-      POSTGRES_USER: yapmitai
-      POSTGRES_PASSWORD: yapmitai
-      POSTGRES_DB: yapmitai
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: yapmitai
+      MYSQL_USER: yapmitai
+      MYSQL_PASSWORD: yapmitai
     ports:
-      - "5432:5432"
+      - "3306:3306"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - mysql_data:/var/lib/mysql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U yapmitai"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uyapmitai", "-pyapmitai"]
       interval: 5s
       timeout: 5s
-      retries: 10
+      retries: 20
 
   redis:
     image: redis:7-alpine
@@ -45,5 +46,5 @@ services:
       retries: 10
 
 volumes:
-  postgres_data:
+  mysql_data:
   chroma_data:

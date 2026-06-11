@@ -14,7 +14,6 @@ from sqlalchemy import (
     UniqueConstraint,
     func,
 )
-from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base
@@ -125,8 +124,8 @@ class AiTool(Base):
         ForeignKey("model_configs.id", ondelete="SET NULL"), nullable=True, index=True
     )
     prompt_template: Mapped[str] = mapped_column(Text)
-    input_schema: Mapped[dict[str, Any] | None] = mapped_column(JSONB)
-    output_schema: Mapped[dict[str, Any] | None] = mapped_column(JSONB)
+    input_schema: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    output_schema: Mapped[dict[str, Any] | None] = mapped_column(JSON)
     enabled: Mapped[bool] = mapped_column(Boolean, default=True, index=True)
     is_system: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
     call_count: Mapped[int] = mapped_column(Integer, default=0)

@@ -39,6 +39,17 @@ npm.cmd run dev
 Local: http://localhost:5173/
 ```
 
+当前前端采用标准 Vue 3 单文件组件：
+
+```text
+index.vue
+├── <template>
+├── <script setup>
+└── <style scoped>
+```
+
+业务接口放在对应页面目录的 `api/index.js`。
+
 浏览器访问：
 
 ```text

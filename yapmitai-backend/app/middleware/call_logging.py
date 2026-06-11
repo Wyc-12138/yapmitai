@@ -4,7 +4,7 @@ from datetime import UTC, datetime
 from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware
 
-from app.db.postgres import AsyncSessionLocal
+from app.db.database import AsyncSessionLocal
 from app.models import AgentCallLog
 
 

@@ -11,7 +11,9 @@ class Settings(BaseSettings):
     agent_gateway_url: str = "https://gateway.yapmitai.com/api/v1"
     agent_gateway_token: str = ""
     agent_timeout_seconds: int = 30
-    database_url: str = "postgresql+asyncpg://yapmitai:yapmitai@localhost:5432/yapmitai"
+    database_url: str = (
+        "mysql+aiomysql://root:change_me@localhost:3306/yapmitai?charset=utf8mb4"
+    )
     redis_url: str = "redis://localhost:6379/0"
     chroma_host: str = "localhost"
     chroma_port: int = 8001
