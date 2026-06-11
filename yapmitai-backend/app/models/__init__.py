@@ -9,6 +9,7 @@ from app.models.business import (
     Message,
     ModelConfig,
 )
+from app.models.growth_task import GrowthTask
 
 __all__ = [
     "Agent",
@@ -16,6 +17,7 @@ __all__ = [
     "AgentKnowledgeBase",
     "Base",
     "Conversation",
+    "GrowthTask",
     "KnowledgeBase",
     "KnowledgeDocument",
     "Message",

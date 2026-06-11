@@ -1,5 +1,6 @@
 import { agents } from "./data/mock.js";
 import { findRoute } from "./routes/index.js";
+import { growthTeamApi } from "./services/growthTeamApi.js";
 import { knowledgeApi } from "./services/knowledgeApi.js";
 import { modelConfigsApi } from "./services/modelConfigsApi.js";
 
@@ -42,6 +43,15 @@ const state = {
     { id: "kb-product-images", name: "商品图片素材库", description: "商品主图、场景图与品牌视觉素材", knowledgeType: "image", collectionCount: 16, createdAt: "2026-04-22 17:26:20", updatedAt: "2026-06-03 14:30:00" }
   ],
   showKey: false,
+  growthPrompt: "",
+  growthTaskId: null,
+  growthStatus: "idle",
+  growthStep: "",
+  growthContext: {},
+  growthResultTab: "market",
+  growthBusy: false,
+  growthError: "",
+  growthPollTimer: null,
   globalEnabled: readStore("agent-global-enabled", true),
   agentPackages: [
     { id: "creation-image", name: "文生图 Agent", type: "AI创作", version: "1.2.0", enabled: true },
@@ -55,6 +65,7 @@ const state = {
 
 const navItems = [
   ["/enterprise/dashboard", "企业控制台", "Dashboard"],
+  ["/enterprise/growth/workflow", "品牌增长方案", "Growth Strategy"],
   ["/enterprise/agents", "超级AI员工", "Agents"],
   ["/enterprise/tools", "AI工具中心", "Tools"],
   ["/enterprise/tools/agent-config", "Agent总配置", "Gateway"],
@@ -271,6 +282,10 @@ document.addEventListener("click", (event) => {
     closeModelConfigDrawer();
   } else if (action === "save-model-config") {
     saveModelConfig();
+  } else if (action === "start-growth-task") {
+    startGrowthTask();
+  } else if (action === "download-growth-report") {
+    downloadGrowthReport();
   }
 });
 
@@ -317,6 +332,13 @@ document.addEventListener("click", (event) => {
 
   if (event.target.closest("[data-action='ask-local-knowledge']")) {
     askLocalKnowledge();
+    return;
+  }
+
+  const growthTabButton = event.target.closest("[data-growth-tab]");
+  if (growthTabButton) {
+    state.growthResultTab = growthTabButton.dataset.growthTab;
+    render();
     return;
   }
 
@@ -643,6 +665,74 @@ async function deleteModelConfig(id) {
     await loadKnowledgeModelConfig();
   } catch (error) {
     state.modelConfigError = error.message;
+    render();
+  }
+}
+
+function stopGrowthPolling() {
+  if (state.growthPollTimer) {
+    clearInterval(state.growthPollTimer);
+    state.growthPollTimer = null;
+  }
+}
+
+async function pollGrowthTask() {
+  if (!state.growthTaskId) return;
+  try {
+    const response = await growthTeamApi.getTask(state.growthTaskId);
+    const task = response.data;
+    state.growthStatus = task.status === "completed" ? "completed" : task.status === "failed" ? "failed" : "running";
+    state.growthStep = task.current_step || state.growthStep;
+    state.growthContext = task.context || {};
+    state.growthError =
+      task.error_message ||
+      (task.status === "failed" ? "任务执行失败，请检查后端终端日志或 .env 中的 EXTERNAL_AI_API_KEY。" : "");
+    if (state.growthStatus === "completed" || state.growthStatus === "failed") {
+      state.growthBusy = false;
+      stopGrowthPolling();
+    }
+    if (window.location.pathname === "/enterprise/growth/workflow") render();
+  } catch (error) {
+    state.growthError = error.message;
+    state.growthBusy = false;
+    state.growthStatus = "failed";
+    stopGrowthPolling();
+    if (window.location.pathname === "/enterprise/growth/workflow") render();
+  }
+}
+
+async function startGrowthTask() {
+  const prompt = document.getElementById("growth-prompt")?.value.trim();
+  if (!prompt || state.growthBusy) return;
+  stopGrowthPolling();
+  state.growthPrompt = prompt;
+  state.growthBusy = true;
+  state.growthStatus = "running";
+  state.growthStep = "market_analyst";
+  state.growthContext = {};
+  state.growthError = "";
+  state.growthTaskId = null;
+  render();
+  try {
+    const response = await growthTeamApi.startTask(prompt);
+    state.growthTaskId = response.data.task_id;
+    state.growthStep = response.data.current_step || "market_analyst";
+    state.growthPollTimer = setInterval(pollGrowthTask, 2500);
+    await pollGrowthTask();
+  } catch (error) {
+    state.growthBusy = false;
+    state.growthStatus = "failed";
+    state.growthError = error.message;
+    render();
+  }
+}
+
+async function downloadGrowthReport() {
+  if (!state.growthTaskId || state.growthStatus !== "completed") return;
+  try {
+    await growthTeamApi.downloadReport(state.growthTaskId);
+  } catch (error) {
+    state.growthError = error.message;
     render();
   }
 }

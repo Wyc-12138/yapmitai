@@ -11,6 +11,7 @@ from app.core.exceptions import AppError
 from app.core.responses import failure, success
 from app.middleware.auth import ApiKeyMiddleware
 from app.middleware.call_logging import CallLoggingMiddleware
+from app.growth.router import router as growth_router
 from app.pages import api_router
 from app.db.postgres import init_database
 
@@ -38,6 +39,7 @@ app.add_middleware(
 app.add_middleware(CallLoggingMiddleware)
 app.add_middleware(ApiKeyMiddleware)
 app.include_router(api_router, prefix=settings.api_v1_prefix)
+app.include_router(growth_router)
 
 
 @app.exception_handler(AppError)

@@ -23,6 +23,12 @@ class Settings(BaseSettings):
     embedding_models: str = "text-embedding-3-small,text-embedding-3-large"
     answer_models: str = "gpt-4o-mini,gpt-4.1-mini"
     knowledge_storage_dir: str = "storage/knowledge"
+    growth_reports_dir: str = "storage/growth_reports"
+    openai_api_key: str = ""
+    openai_model: str = "gpt-4o"
+    anthropic_api_key: str = ""
+    anthropic_model: str = "claude-sonnet-4-20250514"
+    tavily_api_key: str = ""
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 

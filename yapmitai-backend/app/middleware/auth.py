@@ -13,8 +13,9 @@ class ApiKeyMiddleware(BaseHTTPMiddleware):
         if request.method == "OPTIONS":
             return await call_next(request)
 
-        protected_prefix = get_settings().api_v1_prefix
-        if request.url.path.startswith(protected_prefix):
+        path = request.url.path
+        protected = path.startswith(get_settings().api_v1_prefix) or path.startswith("/api/task")
+        if protected:
             supplied_key = request.headers.get("X-API-Key")
             if supplied_key != get_settings().api_key:
                 return JSONResponse(

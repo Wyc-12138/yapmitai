@@ -13,10 +13,12 @@ import agentConfig from "../pages/enterprise/tools/agent-config/index.js";
 import agentLogs from "../pages/enterprise/tools/agent-logs/index.js";
 import governmentDashboard from "../pages/government/dashboard/index.js";
 import talentHome from "../pages/talent/home/index.js";
+import growthWorkflow from "../pages/enterprise/growth/workflow/index.js";
 
 export const routes = [
   home,
   enterpriseDashboard,
+  growthWorkflow,
   enterpriseAgents,
   enterpriseTools,
   agentConfig,

@@ -1,12 +1,16 @@
-import chromadb
-from chromadb.config import Settings
-
 from app.core.config import get_settings
 
 settings = get_settings()
 
 
 def get_chroma_client():
+    try:
+        import chromadb
+        from chromadb.config import Settings
+    except ImportError as exc:
+        raise RuntimeError(
+            "chromadb is not installed. Install dependencies with: pip install -r requirements.txt"
+        ) from exc
     return chromadb.PersistentClient(
         path=settings.chroma_persist_dir,
         settings=Settings(anonymized_telemetry=False),

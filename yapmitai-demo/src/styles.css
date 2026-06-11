@@ -1745,6 +1745,147 @@ th {
   }
 }
 
+.growth-layout {
+  display: grid;
+  gap: 20px;
+}
+
+.growth-brief textarea {
+  width: 100%;
+  min-height: 120px;
+  resize: vertical;
+}
+
+.growth-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+.growth-task-id {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.growth-workflow-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.growth-workflow-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 16px;
+  border: 1px solid var(--stroke);
+  border-radius: 12px;
+  background: var(--panel);
+}
+
+.growth-workflow-row.running {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px rgba(67, 97, 238, 0.12);
+}
+
+.growth-workflow-row.done {
+  border-color: rgba(0, 201, 167, 0.45);
+}
+
+.growth-workflow-row.failed {
+  border-color: #f72585;
+}
+
+.growth-workflow-row-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.growth-step-index {
+  flex: 0 0 28px;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: var(--bg-elevated);
+  font-weight: 700;
+  font-size: 12px;
+}
+
+.growth-workflow-status {
+  flex: 0 0 auto;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.growth-workflow-status.pending {
+  color: var(--text-secondary);
+  background: var(--bg-elevated);
+}
+
+.growth-workflow-status.running {
+  color: #1d4ed8;
+  background: rgba(67, 97, 238, 0.12);
+}
+
+.growth-workflow-status.done {
+  color: #047857;
+  background: rgba(0, 201, 167, 0.12);
+}
+
+.growth-workflow-status.failed {
+  color: #be185d;
+  background: rgba(247, 37, 133, 0.12);
+}
+
+.growth-error-banner {
+  margin-bottom: 16px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(247, 37, 133, 0.45);
+  background: rgba(247, 37, 133, 0.08);
+  color: #9f1239;
+}
+
+.growth-error-banner strong {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 15px;
+}
+
+.growth-error-banner p {
+  margin: 0 0 8px;
+  line-height: 1.6;
+  word-break: break-word;
+}
+
+.growth-error-banner small {
+  color: #be185d;
+  line-height: 1.5;
+}
+
+.growth-json {
+  margin: 0;
+  padding: 16px;
+  border-radius: 12px;
+  background: #0f172a;
+  color: #dbeafe;
+  overflow: auto;
+  max-height: 520px;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
 @media (max-width: 720px) {
   .page-content,
   .gov-screen,
