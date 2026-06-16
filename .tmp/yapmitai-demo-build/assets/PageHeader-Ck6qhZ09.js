@@ -1,0 +1,1 @@
+import{o as r,c as s,a as t,t as a}from"./index-mcpom9WK.js";const o={class:"page-title"},n={class:"eyebrow"},d={__name:"PageHeader",props:{eyebrow:String,title:String,description:String},setup(e){return(i,c)=>(r(),s("div",o,[t("span",n,a(e.eyebrow),1),t("h1",null,a(e.title),1),t("p",null,a(e.description),1)]))}};export{d as P};

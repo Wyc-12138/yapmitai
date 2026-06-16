@@ -15,7 +15,11 @@ from app.pages.enterprise.tools.agent_config.router import router as agent_confi
 from app.pages.enterprise.tools.agent_logs.router import router as agent_logs_router
 from app.pages.enterprise.tools.router import router as tools_center_router
 from app.pages.government.dashboard.router import router as government_dashboard_router
+from app.pages.system.translations.router import router as translations_router
 from app.pages.talent.home.router import router as talent_home_router
+from app.growth.router import router as growth_router
+from app.team.router import router as team_router
+from app.team.workflow.router import router as workflow_router
 
 api_router = APIRouter()
 api_router.include_router(enterprise_dashboard_router)
@@ -32,3 +36,7 @@ api_router.include_router(agent_logs_router)
 api_router.include_router(talent_home_router)
 api_router.include_router(government_dashboard_router)
 api_router.include_router(alliance_dashboard_router)
+api_router.include_router(growth_router)
+api_router.include_router(team_router)
+api_router.include_router(workflow_router)
+api_router.include_router(translations_router)

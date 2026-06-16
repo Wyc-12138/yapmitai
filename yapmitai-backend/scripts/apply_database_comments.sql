@@ -134,3 +134,36 @@ COMMENT ON COLUMN skill_run_records.target IS '结果中的目标';
 COMMENT ON COLUMN skill_run_records.suggested_action IS '结果中的建议动作';
 COMMENT ON COLUMN skill_run_records.deliverables IS '结果中的交付物';
 COMMENT ON COLUMN skill_run_records.created_at IS '生成时间';
+
+COMMENT ON TABLE workflow_tasks IS '工作流任务表：每个任务绑定一个AI团队并保存发布状态';
+COMMENT ON COLUMN workflow_tasks.id IS '工作流任务主键ID';
+COMMENT ON COLUMN workflow_tasks.team_id IS '关联的AI团队ID，指向ai_teams.id';
+COMMENT ON COLUMN workflow_tasks.name IS '工作流任务名称';
+COMMENT ON COLUMN workflow_tasks.description IS '任务目标、说明和交付要求';
+COMMENT ON COLUMN workflow_tasks.enabled IS '是否启用该工作流';
+COMMENT ON COLUMN workflow_tasks.status IS '工作流状态：draft、ready、running、completed或failed';
+COMMENT ON COLUMN workflow_tasks.created_at IS '创建时间';
+COMMENT ON COLUMN workflow_tasks.updated_at IS '最后更新时间';
+
+COMMENT ON TABLE workflow_task_agents IS '工作流任务员工表：保存团队员工的执行顺序和实时状态';
+COMMENT ON COLUMN workflow_task_agents.id IS '任务员工关联主键ID';
+COMMENT ON COLUMN workflow_task_agents.task_id IS '所属工作流任务ID';
+COMMENT ON COLUMN workflow_task_agents.agent_id IS 'AI员工ID，指向agents.id';
+COMMENT ON COLUMN workflow_task_agents.sort_order IS 'Agent在线性工作流中的执行顺序';
+COMMENT ON COLUMN workflow_task_agents.run_status IS '当前执行状态：idle、queued、running、completed或failed';
+COMMENT ON COLUMN workflow_task_agents.output IS 'Agent本次执行的结构化输出，JSON格式';
+COMMENT ON COLUMN workflow_task_agents.error_message IS 'Agent执行失败时的错误信息';
+COMMENT ON COLUMN workflow_task_agents.started_at IS 'Agent开始执行时间';
+COMMENT ON COLUMN workflow_task_agents.finished_at IS 'Agent完成执行时间';
+
+COMMENT ON TABLE workflow_runs IS '工作流运行记录表：记录顺序执行过程和最终PDF报告';
+COMMENT ON COLUMN workflow_runs.id IS '运行记录唯一ID';
+COMMENT ON COLUMN workflow_runs.task_id IS '所属工作流任务ID';
+COMMENT ON COLUMN workflow_runs.status IS '运行状态：running、completed或failed';
+COMMENT ON COLUMN workflow_runs.current_agent_id IS '当前正在执行的AI员工ID';
+COMMENT ON COLUMN workflow_runs.prompt IS '用户输入的一句话需求';
+COMMENT ON COLUMN workflow_runs.report_data IS '全部Agent输出汇总后的报告数据，JSON格式';
+COMMENT ON COLUMN workflow_runs.pdf_path IS '最终PDF报告在服务器中的存储路径';
+COMMENT ON COLUMN workflow_runs.error_message IS '运行失败时的错误信息';
+COMMENT ON COLUMN workflow_runs.started_at IS '运行开始时间';
+COMMENT ON COLUMN workflow_runs.completed_at IS '运行完成时间';

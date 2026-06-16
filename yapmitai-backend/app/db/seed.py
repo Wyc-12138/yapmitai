@@ -6,7 +6,41 @@ from app.models import Agent, AiTool, ModelConfig
 from app.shared.mock_data import AGENTS
 
 
-async def seed_database(session: AsyncSession) -> None:
+GROWTH_AGENTS = [
+    {
+        "code": "growth-market-analyst",
+        "name": "市场分析 Agent",
+        "name_en": "Market Analyst",
+        "description": "分析市场规模、行业趋势、目标人群、竞品与增长机会。",
+        "system_prompt": "你是市场分析师。输出可执行的市场规模、行业趋势、目标客户、竞品和机会分析。",
+    },
+    {
+        "code": "growth-brand-manager",
+        "name": "品牌策略 Agent",
+        "name_en": "Brand Manager",
+        "description": "制定品牌定位、价值主张、差异化卖点与增长策略。",
+        "system_prompt": "你是品牌营销经理。输出品牌定位、口号、核心卖点、竞争优势和增长策略。",
+    },
+    {
+        "code": "growth-content-creator",
+        "name": "内容创作 Agent",
+        "name_en": "Content Creator",
+        "description": "生成适配不同内容渠道的创意、文案和传播资产。",
+        "system_prompt": "你是内容创作专家。为主要社交媒体渠道生成可直接使用的内容资产。",
+    },
+    {
+        "code": "growth-media-buying",
+        "name": "媒介投放 Agent",
+        "name_en": "Media Buying Specialist",
+        "description": "规划预算、受众、渠道组合、A/B 测试和 ROI 预测。",
+        "system_prompt": "你是广告投放专家。输出预算计划、目标受众、渠道组合、测试方案和 ROI 预测。",
+    },
+]
+
+
+async def seed_database(
+    session: AsyncSession, seed_growth_agents: bool = False
+) -> None:
     settings = get_settings()
     existing = {
         (model_type, model_code)
@@ -67,11 +101,13 @@ async def seed_database(session: AsyncSession) -> None:
     )
 
     default_chat_model_id = await session.scalar(
-        select(ModelConfig.id).where(
+        select(ModelConfig.id)
+        .where(
             ModelConfig.model_type == "chat",
             ModelConfig.enabled.is_(True),
-            ModelConfig.is_default.is_(True),
         )
+        .order_by(ModelConfig.is_default.desc(), ModelConfig.id.asc())
+        .limit(1)
     )
     existing_tools = {
         code for code in (await session.execute(select(AiTool.code))).scalars().all()
@@ -157,11 +193,15 @@ async def seed_database(session: AsyncSession) -> None:
     if new_tools:
         session.add_all(new_tools)
 
-    if not await session.scalar(select(func.count()).select_from(Agent)):
+    has_agents = bool(await session.scalar(select(func.count()).select_from(Agent)))
+    if not has_agents:
         session.add_all(
             Agent(
                 id=item["id"],
+                code=f"employee-{item['id']}",
                 name=item["name"],
+                name_en=item["name"],
+                description=f"{item['name']}的企业智能体。",
                 avatar=None,
                 chat_model_config_id=default_chat_model_id,
                 system_prompt=f"你是{item['name']}，请基于关联知识库完成工作。",
@@ -173,10 +213,33 @@ async def seed_database(session: AsyncSession) -> None:
             )
             for item in AGENTS
         )
+        seed_growth_agents = True
     else:
         await session.execute(
             Agent.__table__.update()
             .where(Agent.chat_model_config_id.is_(None))
             .values(chat_model_config_id=default_chat_model_id)
         )
+    if seed_growth_agents:
+        existing_codes = set(
+            (await session.scalars(select(Agent.code))).all()
+        )
+        next_id = (await session.scalar(select(func.max(Agent.id))) or 0) + 1
+        for item in GROWTH_AGENTS:
+            if item["code"] in existing_codes:
+                continue
+            session.add(
+                Agent(
+                    id=next_id,
+                    **item,
+                    avatar=None,
+                    chat_model_config_id=default_chat_model_id,
+                    category="品牌增长",
+                    status="standby",
+                    enabled=True,
+                    today_done=0,
+                    month_kpi=0,
+                )
+            )
+            next_id += 1
     await session.commit()

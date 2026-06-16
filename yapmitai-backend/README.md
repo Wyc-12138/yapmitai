@@ -2,7 +2,7 @@
 
 技术栈：Python 3.12、FastAPI、Pydantic、SQLAlchemy、PostgreSQL、Redis、ChromaDB（本地持久化）、Pytest、Docker Compose。
 
-数据库使用 10 张业务表，完整结构见 [`DATABASE.md`](DATABASE.md)。
+数据库使用 13 张业务表，完整结构见 [`DATABASE.md`](DATABASE.md)。
 
 ## 目录结构
 
@@ -29,6 +29,11 @@ app/
 │   ├── government/dashboard/{router,service,schema}/
 │   └── alliance/dashboard/{router,service,schema}/
 ├── shared/
+├── team/
+│   ├── models.py
+│   ├── router.py
+│   ├── schema.py
+│   └── service.py
 ├── core/
 ├── db/
 ├── middleware/

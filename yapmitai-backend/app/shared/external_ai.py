@@ -38,8 +38,12 @@ class ExternalAIService:
         return [item["embedding"] for item in data["data"]]
 
     async def embed_with_config(
-        self, texts: list[str], config: ModelConfig
+        self, texts: list[str], config: ModelConfig | None
     ) -> list[list[float]]:
+        if config is None:
+            raise InvalidParameterError(
+                "知识库未关联可用的 Embedding 模型，请先在模型配置中启用 Embedding 模型"
+            )
         if config.model_type != "embedding":
             raise InvalidParameterError("Model config is not an embedding model")
         if not config.enabled:
@@ -95,8 +99,12 @@ class ExternalAIService:
         self,
         question: str,
         contexts: list[str],
-        config: ModelConfig,
+        config: ModelConfig | None,
     ) -> dict[str, Any]:
+        if config is None:
+            raise InvalidParameterError(
+                "没有可用的回答生成模型，请先在模型配置中启用 Chat 模型"
+            )
         if config.model_type != "chat":
             raise InvalidParameterError("Model config is not a chat model")
         if not config.enabled:
@@ -139,8 +147,12 @@ class ExternalAIService:
         self,
         system_prompt: str,
         user_prompt: str,
-        config: ModelConfig,
+        config: ModelConfig | None,
     ) -> dict[str, Any]:
+        if config is None:
+            raise InvalidParameterError(
+                "没有可用的 Chat 模型，请先完成模型配置"
+            )
         if config.model_type != "chat":
             raise InvalidParameterError("Model config is not a chat model")
         if not config.enabled:
@@ -212,8 +224,12 @@ class ExternalAIService:
         self,
         content: bytes,
         content_type: str,
-        config: ModelConfig,
+        config: ModelConfig | None,
     ) -> str:
+        if config is None:
+            raise InvalidParameterError(
+                "没有可用的图片理解模型，请先在模型配置中启用 Chat 模型"
+            )
         if config.model_type != "chat":
             raise InvalidParameterError("Model config is not a chat model")
         api_key = decrypt_api_key(config.api_key_encrypted)
@@ -288,6 +304,23 @@ class ExternalAIService:
                 await session.commit()
             return data
         except httpx.HTTPError as exc:
+            upstream_detail = ""
+            if isinstance(exc, httpx.HTTPStatusError):
+                try:
+                    payload = exc.response.json()
+                    upstream_detail = (
+                        payload.get("error", {}).get("message")
+                        or payload.get("message")
+                        or exc.response.text
+                    )
+                except (ValueError, AttributeError):
+                    upstream_detail = exc.response.text
+            upstream_detail = str(upstream_detail).strip()[:1000]
+            error_message = (
+                f"External AI API request failed: {upstream_detail}"
+                if upstream_detail
+                else f"External AI API request failed: {exc}"
+            )
             async with AsyncSessionLocal() as session:
                 session.add(
                     AgentCallLog(
@@ -300,11 +333,11 @@ class ExternalAIService:
                         status="failed",
                         latency_ms=round((time.perf_counter() - started) * 1000),
                         cost=0,
-                        error_msg=str(exc),
+                        error_msg=error_message,
                     )
                 )
                 await session.commit()
-            raise AgentUnavailableError(f"External AI API request failed: {exc}") from exc
+            raise AgentUnavailableError(error_message) from exc
 
 
 external_ai_service = ExternalAIService()

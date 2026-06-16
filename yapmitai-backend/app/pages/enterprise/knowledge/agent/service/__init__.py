@@ -79,6 +79,23 @@ async def _model_by_code_or_default(
     return await _default_model_config(db, model_type)
 
 
+async def _embedding_config_for_library(
+    db: AsyncSession, library: KnowledgeBase
+) -> ModelConfig:
+    config = (
+        await db.get(ModelConfig, library.embedding_model_config_id)
+        if library.embedding_model_config_id
+        else None
+    )
+    if config and config.model_type == "embedding" and config.enabled:
+        return config
+    config = await _default_model_config(db, "embedding")
+    library.embedding_model_config_id = config.id
+    library.updated_at = datetime.now(UTC)
+    await db.commit()
+    return config
+
+
 def split_text(text: str, chunk_size: int = 500, overlap: int = 50) -> list[str]:
     normalized = " ".join(text.split())
     if not normalized:
@@ -188,7 +205,7 @@ async def test_models(
     library = await db.get(KnowledgeBase, knowledge_base_id)
     if not library:
         raise ValueError("Local knowledge base not found")
-    embedding_config = await db.get(ModelConfig, library.embedding_model_config_id)
+    embedding_config = await _embedding_config_for_library(db, library)
     chat_config = await _default_model_config(db, "chat")
     embeddings = await external_ai_service.embed_with_config([text], embedding_config)
     generated = await external_ai_service.answer_with_config(
@@ -360,7 +377,7 @@ async def add_document(
     )
     db.add(document)
     await db.flush()
-    embedding_config = await db.get(ModelConfig, library.embedding_model_config_id)
+    embedding_config = await _embedding_config_for_library(db, library)
     chat_config = await _default_model_config(db, "chat")
     try:
         if (content_type or "").startswith("image/"):
@@ -422,7 +439,7 @@ async def query(
     libraries = (await db.scalars(statement)).all()
     if not libraries:
         raise ValueError("No local knowledge base is available")
-    embedding_config = await db.get(ModelConfig, libraries[0].embedding_model_config_id)
+    embedding_config = await _embedding_config_for_library(db, libraries[0])
     chat_config = (
         await _model_by_code_or_default(db, "chat", answer_model)
         if answer_model

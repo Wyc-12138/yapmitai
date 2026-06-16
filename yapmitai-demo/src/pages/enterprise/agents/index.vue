@@ -1,49 +1,279 @@
 <template>
   <section>
-    <PageHeader eyebrow="Super AI Agent Center" title="超级AI员工中心" description="像管理团队一样管理AI。" />
-    <div class="page-toolbar"><div class="tabs"><button v-for="item in categories" :key="item" :class="{ active: filter === item }" @click="filter = item">{{ item }}</button></div><button class="primary-btn">新增AI员工</button></div>
-    <div class="agent-grid">
-      <button v-for="agent in visible" :key="agent.id" class="agent-card" @click="selected = agent">
-        <div class="avatar-ring" :class="agent.status">AI</div><strong>{{ agent.name }}</strong><small>{{ agent.nameEn }}</small>
-        <span class="status-badge" :class="agent.status">{{ statusText(agent.status) }}</span>
-        <div class="agent-card-footer"><span>今日完成 <b>{{ agent.completedTasks }}</b> 项</span><span>月KPI <b>{{ agent.monthKPI }}</b></span></div>
-        <div class="card-actions"><span>查看详情</span><span>分配任务</span></div>
-      </button>
-      <button class="agent-card add-card">+ 添加新AI员工</button>
-    </div>
+    <PageHeader
+      eyebrow="Super AI Agent Center"
+      title="超级AI员工中心"
+      description="统一管理企业智能体、增长团队角色、模型和系统提示词。"
+    />
 
-    <div v-if="selected" class="drawer-backdrop" @click.self="closeDrawer">
-      <aside class="drawer">
-        <div class="drawer-head"><div><h2>{{ selected.name }}</h2><span>{{ selected.nameEn }}</span></div><button class="icon-btn" @click="closeDrawer">×</button></div>
-        <p class="drawer-desc">{{ selected.description }}</p>
-        <ProgressBar label="本月完成率" :value="selected.monthKPI" />
-        <ProgressBar label="质量分" :value="Math.min(99, selected.monthKPI + 3)" />
-        <h3>今日工作日志</h3><div class="timeline"><div v-for="item in selected.todayLog" :key="`${item.time}-${item.action}`"><time>{{ item.time }}</time><span>{{ item.action }}</span></div></div>
-        <button class="primary-btn full" @click="taskOpen = true; submitted = false">分配任务</button>
-      </aside>
-    </div>
-
-    <div v-if="taskOpen" class="modal-backdrop" @click.self="taskOpen = false">
-      <div class="modal"><h2>分配任务</h2>
-        <div v-if="submitted" class="success-state"><strong>任务已进入队列</strong><span>AI员工状态已更新为进行中</span></div>
-        <template v-else><label class="field-label">任务描述</label><textarea v-model="task.description" placeholder="例如：生成品牌出海内容包（英文版）"></textarea><label class="field-label">截止时间</label><input v-model="task.deadline" readonly><label class="field-label">优先级</label><select v-model="task.priority"><option>高</option><option>中</option><option>低</option></select><button class="primary-btn full" @click="submitted = true">提交任务</button></template>
+    <div class="page-toolbar">
+      <div class="tabs agent-category-tabs">
+        <button
+          v-for="item in categories"
+          :key="item"
+          :class="{ active: filter === item }"
+          @click="filter = item"
+        >
+          {{ item }}
+        </button>
       </div>
+      <button class="primary-btn" @click="openCreate">新增AI员工</button>
+    </div>
+
+    <p v-if="errorMessage && !drawerOpen" class="form-error">{{ errorMessage }}</p>
+
+    <div class="agent-grid agent-crud-grid">
+      <article v-for="agent in visibleAgents" :key="agent.id" class="agent-card">
+        <div class="agent-card-top">
+          <div class="avatar-ring" :class="agent.status">
+            {{ avatarText(agent) }}
+          </div>
+          <span class="status-badge" :class="agent.status">
+            {{ statusText(agent.status) }}
+          </span>
+        </div>
+        <strong>{{ agent.name }}</strong>
+        <small>{{ agent.nameEn || agent.code }}</small>
+        <p>{{ agent.description || "暂无角色说明" }}</p>
+        <div class="agent-meta">
+          <span>{{ agent.category }}</span>
+          <span>{{ agent.model || "未选择模型" }}</span>
+        </div>
+        <div class="agent-card-footer">
+          <span>今日完成 <b>{{ agent.todayDone }}</b> 项</span>
+          <span>月KPI <b>{{ agent.monthKPI }}%</b></span>
+        </div>
+        <div class="row-actions agent-card-actions">
+          <button class="tiny-btn" @click="openEdit(agent)">编辑</button>
+          <button class="danger-btn" @click="removeAgent(agent)">删除</button>
+        </div>
+      </article>
+
+      <button class="agent-card add-card" @click="openCreate">
+        <span>+</span>
+        添加新AI员工
+      </button>
+    </div>
+
+    <div v-if="drawerOpen" class="drawer-backdrop agent-editor-backdrop">
+      <aside class="drawer agent-editor-drawer">
+        <div class="drawer-head">
+          <div>
+            <h2>{{ form.id ? "编辑AI员工" : "新增AI员工" }}</h2>
+            <span>{{ form.nameEn || "Agent Profile" }}</span>
+          </div>
+          <button class="icon-btn" title="关闭" @click="closeDrawer">×</button>
+        </div>
+
+        <div class="drawer-form agent-editor-form">
+          <div class="agent-form-grid">
+            <label>角色编码
+              <input v-model.trim="form.code" placeholder="例如 growth-market-research">
+            </label>
+            <label>中文名称
+              <input v-model.trim="form.name" placeholder="例如 市场研究 Agent">
+            </label>
+            <label>英文名称
+              <input v-model.trim="form.nameEn" placeholder="Market Research">
+            </label>
+            <label>分类
+              <input v-model.trim="form.category" list="agent-categories" placeholder="例如 品牌增长">
+              <datalist id="agent-categories">
+                <option v-for="item in categories.slice(1)" :key="item" :value="item"></option>
+              </datalist>
+            </label>
+            <label>Chat 模型
+              <select v-model="form.chatModelConfigId">
+                <option :value="null">使用系统默认模型</option>
+                <option v-for="model in chatModels" :key="model.id" :value="model.id">
+                  {{ model.displayName }}{{ model.isDefault ? " · 默认" : "" }}
+                </option>
+              </select>
+            </label>
+            <label>运行状态
+              <select v-model="form.status">
+                <option value="standby">待命中</option>
+                <option value="working">工作中</option>
+                <option value="offline">离线</option>
+              </select>
+            </label>
+            <label>今日完成
+              <input v-model.number="form.todayDone" type="number" min="0">
+            </label>
+            <label>月KPI
+              <input v-model.number="form.monthKPI" type="number" min="0" max="100">
+            </label>
+          </div>
+
+          <label>头像地址
+            <input v-model.trim="form.avatar" placeholder="可选，填写图片 URL">
+          </label>
+          <label>角色说明
+            <textarea v-model.trim="form.description" placeholder="说明该 Agent 的职责和使用场景"></textarea>
+          </label>
+          <label>System Prompt
+            <textarea
+              v-model="form.systemPrompt"
+              class="agent-prompt-input"
+              placeholder="定义角色、输入输出要求和工作边界"
+            ></textarea>
+          </label>
+          <label class="drawer-check">
+            <input v-model="form.enabled" type="checkbox">
+            启用该 AI 员工
+          </label>
+          <p v-if="errorMessage" class="form-error">{{ errorMessage }}</p>
+        </div>
+
+        <button class="primary-btn full agent-editor-submit" :disabled="saving" @click="saveAgent">
+          {{ saving ? "正在保存..." : form.id ? "确认保存" : "确认新增" }}
+        </button>
+      </aside>
     </div>
   </section>
 </template>
+
 <script setup>
-import { computed, reactive, ref } from "vue";
+import { computed, onMounted, reactive, ref } from "vue";
 import PageHeader from "../../../components/PageHeader.vue";
-import ProgressBar from "../../../components/ProgressBar.vue";
-import { agents } from "../../../data/mock.js";
-const categories = ["全部", "营销类", "运营类", "客服类", "数据类", "管理类"];
+import { agentsApi } from "./api/index.js";
+
+const agents = ref([]);
+const chatModels = ref([]);
 const filter = ref("全部");
-const selected = ref(null);
-const taskOpen = ref(false);
-const submitted = ref(false);
-const task = reactive({ description: "", deadline: "今天 18:00", priority: "高" });
-const visible = computed(() => filter.value === "全部" ? agents : agents.filter((item) => item.category === filter.value));
-const statusText = (status) => ({ working: "工作中", standby: "待命中", offline: "离线" })[status] || status;
-function closeDrawer() { selected.value = null; taskOpen.value = false; }
+const loading = ref(false);
+const saving = ref(false);
+const drawerOpen = ref(false);
+const errorMessage = ref("");
+
+const defaults = () => ({
+  id: null,
+  code: "",
+  name: "",
+  nameEn: "",
+  description: "",
+  avatar: "",
+  chatModelConfigId: null,
+  systemPrompt: "",
+  category: "品牌增长",
+  status: "standby",
+  enabled: true,
+  todayDone: 0,
+  monthKPI: 0
+});
+
+const form = reactive(defaults());
+const categories = computed(() => [
+  "全部",
+  ...new Set(["品牌增长", ...agents.value.map((item) => item.category).filter(Boolean)])
+]);
+const visibleAgents = computed(() =>
+  filter.value === "全部"
+    ? agents.value
+    : agents.value.filter((item) => item.category === filter.value)
+);
+
+function avatarText(agent) {
+  return (agent.nameEn || agent.name || "AI").slice(0, 2).toUpperCase();
+}
+
+function statusText(status) {
+  return { working: "工作中", standby: "待命中", offline: "离线" }[status] || status;
+}
+
+function resetForm(value = {}) {
+  Object.assign(form, defaults(), value);
+}
+
+async function loadData() {
+  loading.value = true;
+  errorMessage.value = "";
+  try {
+    const [agentResponse, modelResponse] = await Promise.all([
+      agentsApi.list(),
+      agentsApi.chatModels()
+    ]);
+    agents.value = agentResponse.data || [];
+    chatModels.value = modelResponse.data || [];
+  } catch (error) {
+    errorMessage.value = error.message;
+  } finally {
+    loading.value = false;
+  }
+}
+
+function openCreate() {
+  resetForm();
+  errorMessage.value = "";
+  drawerOpen.value = true;
+}
+
+function openEdit(agent) {
+  resetForm(agent);
+  errorMessage.value = "";
+  drawerOpen.value = true;
+}
+
+function closeDrawer() {
+  if (!window.confirm("退出后当前内容不会保存，确定退出吗？")) return;
+  drawerOpen.value = false;
+}
+
+function buildPayload() {
+  return {
+    code: form.code,
+    name: form.name,
+    name_en: form.nameEn || null,
+    description: form.description || null,
+    avatar: form.avatar || null,
+    chat_model_config_id: form.chatModelConfigId || null,
+    system_prompt: form.systemPrompt,
+    category: form.category,
+    status: form.status,
+    enabled: form.enabled,
+    today_done: Number(form.todayDone) || 0,
+    month_kpi: Number(form.monthKPI) || 0
+  };
+}
+
+async function saveAgent() {
+  if (!form.code || !form.name || !form.category) {
+    errorMessage.value = "请填写角色编码、中文名称和分类。";
+    return;
+  }
+  if (!/^[a-z0-9-]+$/.test(form.code)) {
+    errorMessage.value = "角色编码只能使用小写字母、数字和短横线。";
+    return;
+  }
+  saving.value = true;
+  errorMessage.value = "";
+  try {
+    if (form.id) {
+      await agentsApi.update(form.id, buildPayload());
+    } else {
+      await agentsApi.create(buildPayload());
+    }
+    drawerOpen.value = false;
+    await loadData();
+  } catch (error) {
+    errorMessage.value = error.message;
+  } finally {
+    saving.value = false;
+  }
+}
+
+async function removeAgent(agent) {
+  if (!window.confirm(`确定删除 AI 员工“${agent.name}”吗？删除后相关工作流可能无法运行。`)) return;
+  try {
+    await agentsApi.delete(agent.id);
+    await loadData();
+  } catch (error) {
+    errorMessage.value = error.message;
+  }
+}
+
+onMounted(loadData);
 </script>
-<style scoped></style>
+
+<style scoped>
+</style>

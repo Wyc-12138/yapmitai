@@ -1,18 +1,27 @@
 from uuid import uuid4
 
-from sqlalchemy import select, update
+from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.models import Agent, AgentKnowledgeBase, Conversation, KnowledgeBase, Message
+from app.models import (
+    Agent,
+    AgentKnowledgeBase,
+    Conversation,
+    KnowledgeBase,
+    Message,
+    ModelConfig,
+)
 
 
 def _agent_dict(agent: Agent) -> dict:
     chat_config = agent.__dict__.get("chat_model_config")
     return {
         "id": agent.id,
+        "code": agent.code,
         "name": agent.name,
-        "nameEn": agent.name,
+        "nameEn": agent.name_en or "",
+        "description": agent.description or "",
         "avatar": agent.avatar,
         "chatModelConfigId": agent.chat_model_config_id,
         "model": chat_config.display_name if chat_config else "",
@@ -24,6 +33,84 @@ def _agent_dict(agent: Agent) -> dict:
         "monthKPI": agent.month_kpi,
         "enabled": agent.enabled,
     }
+
+
+async def _valid_chat_model(db: AsyncSession, config_id: int | None) -> bool:
+    if config_id is None:
+        return True
+    return bool(
+        await db.scalar(
+            select(ModelConfig.id).where(
+                ModelConfig.id == config_id,
+                ModelConfig.model_type == "chat",
+            )
+        )
+    )
+
+
+async def create_agent(db: AsyncSession, payload: dict) -> dict:
+    if await db.scalar(select(Agent.id).where(Agent.code == payload["code"])):
+        raise ValueError("Agent code already exists")
+    if not await _valid_chat_model(db, payload.get("chat_model_config_id")):
+        raise ValueError("Agent can only use a Chat model")
+    agent = Agent(
+        id=(await db.scalar(select(func.max(Agent.id))) or 0) + 1,
+        **payload,
+    )
+    db.add(agent)
+    await db.commit()
+    return await get_agent(db, agent.id)
+
+
+async def update_agent(
+    db: AsyncSession, agent_id: int, payload: dict
+) -> dict | None:
+    agent = await db.get(Agent, agent_id)
+    if not agent:
+        return None
+    if "code" in payload and payload["code"] != agent.code:
+        if await db.scalar(select(Agent.id).where(Agent.code == payload["code"])):
+            raise ValueError("Agent code already exists")
+    if (
+        "chat_model_config_id" in payload
+        and not await _valid_chat_model(db, payload["chat_model_config_id"])
+    ):
+        raise ValueError("Agent can only use a Chat model")
+    for field, value in payload.items():
+        setattr(agent, field, value)
+    await db.commit()
+    return await get_agent(db, agent_id)
+
+
+async def delete_agent(db: AsyncSession, agent_id: int) -> bool:
+    agent = await db.get(Agent, agent_id)
+    if not agent:
+        return False
+    await db.delete(agent)
+    await db.commit()
+    return True
+
+
+async def list_chat_models(db: AsyncSession) -> list[dict]:
+    models = (
+        await db.scalars(
+            select(ModelConfig)
+            .where(
+                ModelConfig.model_type == "chat",
+                ModelConfig.enabled.is_(True),
+            )
+            .order_by(ModelConfig.is_default.desc(), ModelConfig.display_name)
+        )
+    ).all()
+    return [
+        {
+            "id": item.id,
+            "displayName": item.display_name,
+            "modelCode": item.model_code,
+            "isDefault": item.is_default,
+        }
+        for item in models
+    ]
 
 
 async def list_agents(db: AsyncSession, category: str | None = None) -> list[dict]:
@@ -49,8 +136,7 @@ async def toggle_agent(db: AsyncSession, agent_id: int, enabled: bool) -> dict |
     agent.enabled = enabled
     agent.status = "standby" if enabled else "offline"
     await db.commit()
-    await db.refresh(agent)
-    return _agent_dict(agent)
+    return await get_agent(db, agent_id)
 
 
 async def toggle_global(db: AsyncSession, enabled: bool) -> dict:

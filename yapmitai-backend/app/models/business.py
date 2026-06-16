@@ -23,7 +23,10 @@ class Agent(Base):
     __tablename__ = "agents"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    code: Mapped[str] = mapped_column(String(80), unique=True, index=True)
     name: Mapped[str] = mapped_column(String(100))
+    name_en: Mapped[str | None] = mapped_column(String(150))
+    description: Mapped[str | None] = mapped_column(Text)
     avatar: Mapped[str | None] = mapped_column(String(500))
     chat_model_config_id: Mapped[int | None] = mapped_column(
         ForeignKey("model_configs.id", ondelete="SET NULL"), nullable=True, index=True
