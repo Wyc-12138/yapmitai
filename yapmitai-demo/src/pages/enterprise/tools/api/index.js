@@ -1,5 +1,4 @@
-const API_BASE = "http://localhost:8000/api/v1";
-const API_KEY = "yap_demo_key_2026";
+import { API_BASE, API_KEY } from "../../../../apiConfig.js";
 
 async function request(path, options = {}) {
   const response = await fetch(`${API_BASE}${path}`, {
@@ -16,6 +15,12 @@ async function request(path, options = {}) {
   }
   return response.json();
 }
+
+export const demoMediaApi = {
+  textToImage: (payload) => request("/demo-media/text-to-image", { method: "POST", body: JSON.stringify(payload) }),
+  textToVideo: (payload) => request("/demo-media/text-to-video", { method: "POST", body: JSON.stringify(payload) }),
+  getVideoStatus: (taskId) => request(`/demo-media/video-status/${taskId}`)
+};
 
 export const toolsApi = {
   list(params = {}) {

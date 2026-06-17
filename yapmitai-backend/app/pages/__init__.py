@@ -6,6 +6,7 @@ from app.pages.alliance.dashboard.router import router as alliance_dashboard_rou
 from app.pages.enterprise.agents.router import router as enterprise_agents_router
 from app.pages.enterprise.corpwx.agent.router import router as corpwx_agent_router
 from app.pages.enterprise.creation.agent.router import router as creation_agent_router
+from app.pages.enterprise.demo_media.router import router as demo_media_router
 from app.pages.enterprise.dashboard.router import router as enterprise_dashboard_router
 from app.pages.enterprise.knowledge.agent.router import router as knowledge_agent_router
 from app.pages.enterprise.model_configs.router import router as model_configs_router
@@ -39,4 +40,5 @@ api_router.include_router(alliance_dashboard_router)
 api_router.include_router(growth_router)
 api_router.include_router(team_router)
 api_router.include_router(workflow_router)
+api_router.include_router(demo_media_router)
 api_router.include_router(translations_router)

@@ -1,5 +1,4 @@
-const API_BASE = "http://localhost:8000/api/v1";
-const API_KEY = "yap_demo_key_2026";
+import { API_BASE, API_KEY } from "../../../../apiConfig.js";
 
 async function request(path, options = {}) {
   const response = await fetch(`${API_BASE}${path}`, {

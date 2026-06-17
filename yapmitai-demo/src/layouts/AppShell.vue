@@ -124,10 +124,14 @@ const portals = {
         item("/enterprise/personalwx/agent", "个微Agent", "Personal WX", "私"),
         item("/enterprise/corpwx/agent", "企微Agent", "Corp WX", "企")
       ]),
-      group("system", "系统管理", "System", "⚙", [
-        item("/enterprise/model-configs", "模型配置", "Models", "◫"),
-        item("/enterprise/tools/agent-config", "Agent总配置", "Gateway", "◉"),
+      group("results", "业务结果", "Business Results", "📊", [
+        item("/enterprise/billing", "费用中心", "Billing", "💰"),
         item("/enterprise/tools/agent-logs", "调用日志", "Logs", "≡")
+      ]),
+      group("system", "系统管理", "System", "⚙", [
+        item("/enterprise/energy-center", "AI能源中心", "Energy Center", "⚡"),
+        item("/enterprise/model-configs", "模型配置", "Models", "◫"),
+        item("/enterprise/tools/agent-config", "Agent总配置", "Gateway", "◉")
       ])
     ]
   },

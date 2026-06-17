@@ -13,7 +13,11 @@ export default defineConfig({
   cacheDir: join(tmpdir(), "yapmitai-vite-cache"),
   server: {
     host: "0.0.0.0",
-    port: 5173
+    port: 5173,
+    proxy: {
+      "/api/v1": "http://localhost:8000",
+      "/generated": "http://localhost:8000"
+    }
   },
   preview: {
     host: "0.0.0.0",

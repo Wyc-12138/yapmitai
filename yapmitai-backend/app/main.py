@@ -1,9 +1,11 @@
+import os
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.core.config import get_settings
@@ -38,6 +40,11 @@ app.add_middleware(
 app.add_middleware(CallLoggingMiddleware)
 app.add_middleware(ApiKeyMiddleware)
 app.include_router(api_router, prefix=settings.api_v1_prefix)
+
+# Serve generated media files (images / videos)
+_generated_dir = os.path.abspath(settings.generated_media_dir)
+os.makedirs(_generated_dir, exist_ok=True)
+app.mount("/generated", StaticFiles(directory=_generated_dir), name="generated_media")
 
 
 @app.exception_handler(AppError)

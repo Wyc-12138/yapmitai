@@ -1,5 +1,4 @@
-const API_BASE = "http://localhost:8000/api/v1";
-const API_KEY = "yap_demo_key_2026";
+import { API_BASE, API_KEY } from "../../../../apiConfig.js";
 
 const FIELD_LABELS = {
   name: "团队名称",

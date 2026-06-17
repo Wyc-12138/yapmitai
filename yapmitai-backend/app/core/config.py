@@ -26,6 +26,13 @@ class Settings(BaseSettings):
     answer_models: str = "gpt-4o-mini,gpt-4.1-mini"
     knowledge_storage_dir: str = "storage/knowledge"
     growth_reports_dir: str = "storage/growth-reports"
+    image_api_base_url: str = ""
+    image_api_key: str = ""
+    image_model_name: str = "dall-e-3"
+    video_api_base_url: str = ""
+    video_api_key: str = ""
+    video_model_name: str = "sora"
+    generated_media_dir: str = "storage/generated"
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
