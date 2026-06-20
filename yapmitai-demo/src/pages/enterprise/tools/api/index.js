@@ -1,4 +1,5 @@
 import { API_BASE, API_KEY } from "../../../../apiConfig.js";
+import { parseApiResponse } from "../../../../apiResponse.js";
 
 async function request(path, options = {}) {
   const response = await fetch(`${API_BASE}${path}`, {
@@ -9,16 +10,15 @@ async function request(path, options = {}) {
       ...options.headers
     }
   });
-  if (!response.ok) {
-    const payload = await response.json().catch(() => ({}));
-    throw new Error(payload.msg || payload.detail || `AI工具接口请求失败：${response.status}`);
-  }
-  return response.json();
+
+  return parseApiResponse(response, "AI工具接口请求失败");
 }
 
 export const demoMediaApi = {
-  textToImage: (payload) => request("/demo-media/text-to-image", { method: "POST", body: JSON.stringify(payload) }),
-  textToVideo: (payload) => request("/demo-media/text-to-video", { method: "POST", body: JSON.stringify(payload) }),
+  textToImage: (payload) =>
+    request("/demo-media/text-to-image", { method: "POST", body: JSON.stringify(payload) }),
+  textToVideo: (payload) =>
+    request("/demo-media/text-to-video", { method: "POST", body: JSON.stringify(payload) }),
   getVideoStatus: (taskId) => request(`/demo-media/video-status/${taskId}`)
 };
 

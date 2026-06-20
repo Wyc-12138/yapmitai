@@ -6,9 +6,11 @@ T = TypeVar("T")
 
 
 class ApiResponse(BaseModel, Generic[T]):
-    code: int = 200
-    data: T
-    msg: str = "success"
+    code: int = 0
+    msg: str = "操作成功"
+    data: T | None = None
+    status_code: int = 200
+    success: bool = True
     traceId: str
 
 

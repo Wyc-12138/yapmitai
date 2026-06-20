@@ -19,6 +19,10 @@ class ApiKeyMiddleware(BaseHTTPMiddleware):
             if supplied_key != get_settings().api_key:
                 return JSONResponse(
                     status_code=401,
-                    content=failure(401, "Unauthorized: invalid X-API-Key"),
+                    content=failure(
+                        10401,
+                        "认证失败，请登录后再试",
+                        status_code=401,
+                    ),
                 )
         return await call_next(request)

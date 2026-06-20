@@ -291,8 +291,16 @@ async function loadList() {
     ]);
     tasks.value = taskResponse.data || [];
     teamOptions.value = teamResponse.data || [];
+    openCreateFromQuery();
   } catch (error) {
     errorMessage.value = error.message;
+  }
+}
+
+function openCreateFromQuery() {
+  if (!isDetail.value && route.query.create === "1") {
+    openCreate();
+    router.replace({ path: "/enterprise/workflows" });
   }
 }
 
@@ -461,6 +469,11 @@ watch(
     if (id) loadDetail();
     else loadList();
   }
+);
+
+watch(
+  () => route.query.create,
+  () => openCreateFromQuery()
 );
 
 onMounted(() => {

@@ -51,7 +51,7 @@ app.mount("/generated", StaticFiles(directory=_generated_dir), name="generated_m
 async def handle_app_error(_: Request, exc: AppError) -> JSONResponse:
     return JSONResponse(
         status_code=exc.status_code,
-        content=failure(exc.code, exc.message),
+        content=failure(exc.code, exc.message, status_code=exc.status_code),
     )
 
 
@@ -59,7 +59,7 @@ async def handle_app_error(_: Request, exc: AppError) -> JSONResponse:
 async def handle_http_error(_: Request, exc: StarletteHTTPException) -> JSONResponse:
     return JSONResponse(
         status_code=exc.status_code,
-        content=failure(exc.status_code, str(exc.detail)),
+        content=failure(exc.status_code, str(exc.detail), status_code=exc.status_code),
     )
 
 
@@ -67,7 +67,7 @@ async def handle_http_error(_: Request, exc: StarletteHTTPException) -> JSONResp
 async def handle_validation_error(_: Request, exc: RequestValidationError) -> JSONResponse:
     return JSONResponse(
         status_code=422,
-        content=failure(4003, "Invalid request parameters", exc.errors()),
+        content=failure(10422, "请求参数校验失败", exc.errors(), status_code=422),
     )
 
 
@@ -75,7 +75,7 @@ async def handle_validation_error(_: Request, exc: RequestValidationError) -> JS
 async def handle_unexpected_error(_: Request, exc: Exception) -> JSONResponse:
     return JSONResponse(
         status_code=500,
-        content=failure(5000, f"Internal server error: {exc}"),
+        content=failure(10500, "服务器内部错误", status_code=500),
     )
 
 

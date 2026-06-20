@@ -39,19 +39,47 @@
           </button>
 
           <div v-show="!sidebarCollapsed && isGroupOpen(group.key)" class="nav-group-items">
-            <button
+            <div
               v-for="item in group.items"
-              :key="item.path"
-              class="nav-item"
-              :class="{ active: isRouteActive(item.path) }"
-              @click="router.push(item.path)"
+              :key="item.key || item.path || item.label"
+              class="nav-item-block"
             >
-              <span class="nav-item-icon">{{ item.icon }}</span>
-              <span class="nav-item-copy">
-                <strong>{{ item.label }}</strong>
-                <small>{{ item.en }}</small>
-              </span>
-            </button>
+              <button
+                class="nav-item"
+                :class="{
+                  active: isItemActive(item),
+                  disabled: item.disabled,
+                  'has-children': item.children?.length
+                }"
+                :disabled="item.disabled"
+                @click="handleItemClick(item)"
+              >
+                <span class="nav-item-icon">{{ item.icon }}</span>
+                <span class="nav-item-copy">
+                  <strong>{{ item.label }}</strong>
+                  <small>{{ item.en }}</small>
+                </span>
+                <span v-if="item.badge" class="nav-item-badge">{{ item.badge }}</span>
+              </button>
+
+              <div v-if="item.children?.length" class="nav-subitems">
+                <button
+                  v-for="child in item.children"
+                  :key="child.key || child.path || child.label"
+                  class="nav-item nav-subitem"
+                  :class="{ active: isItemActive(child), disabled: child.disabled }"
+                  :disabled="child.disabled"
+                  @click="handleItemClick(child)"
+                >
+                  <span class="nav-item-icon">{{ child.icon }}</span>
+                  <span class="nav-item-copy">
+                    <strong>{{ child.label }}</strong>
+                    <small>{{ child.en }}</small>
+                  </span>
+                  <span v-if="child.badge" class="nav-item-badge">{{ child.badge }}</span>
+                </button>
+              </div>
+            </div>
           </div>
         </section>
       </nav>
@@ -69,16 +97,15 @@
           <span>{{ portal.title }} · {{ portal.subtitle }}</span>
         </div>
         <div class="top-actions">
-          <button
-            class="language-toggle no-translate"
-            :title="language === 'zh' ? 'Switch to English' : '切换为中文'"
-            @click="toggleLanguage"
-          >
-            {{ language === "zh" ? "EN" : "中文" }}
+          <span class="top-date">{{ headerDate }}</span>
+          <button class="top-action-btn" @click="router.push('/enterprise/tools/agent-logs')">
+            调用日志
           </button>
-          <button class="ghost-btn" @click="router.push('/')">切换入口</button>
-          <button class="primary-btn" @click="router.push(portal.actionPath)">
-            {{ portal.actionLabel }}
+          <button class="top-action-btn" disabled>
+            导出报告
+          </button>
+          <button class="top-action-primary" @click="createTask">
+            + 新增任务
           </button>
         </div>
       </header>
@@ -92,13 +119,14 @@
 <script setup>
 import { computed, reactive, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { language, toggleLanguage } from "../i18n/index.js";
 
 const route = useRoute();
 const router = useRouter();
 
-const item = (path, label, en, icon) => ({ path, label, en, icon });
+const item = (path, label, en, icon, options = {}) => ({ path, label, en, icon, ...options });
 const group = (key, label, en, icon, items) => ({ key, label, en, icon, items });
+const comingSoon = (label, en, icon) =>
+  item(null, label, en, icon, { disabled: true, badge: "Coming Soon" });
 
 const portals = {
   enterprise: {
@@ -108,30 +136,46 @@ const portals = {
     actionPath: "/enterprise/tools",
     actionLabel: "AI工具中心",
     groups: [
-      group("overview", "工作总览", "Overview", "⌂", [
-        item("/enterprise/dashboard", "企业控制台", "Dashboard", "▦")
+      group("overview", "总览", "Overview", "O", [
+        item("/enterprise/dashboard", "控制台", "Dashboard", "D"),
+        comingSoon("任务", "Tasks", "T"),
+        item("/enterprise/workflows", "工作流工作室", "Workflow Studio", "W")
       ]),
-      group("organization", "AI组织", "AI Organization", "◎", [
-        item("/enterprise/agents", "超级AI员工", "Agents", "AI"),
-        item("/enterprise/teams", "AI团队", "Teams", "◆"),
-        item("/enterprise/workflows", "AI工作流", "Workflows", "⇢")
+      group("workforce", "AI 劳动力", "Workforce", "W", [
+        item("/enterprise/agents", "AI 员工", "AI Employees", "AI"),
+        item("/enterprise/teams", "AI 团队", "AI Teams", "T"),
+        item("/enterprise/knowledge/agent", "知识库", "Knowledge Base", "K")
       ]),
-      group("capabilities", "能力中心", "Capabilities", "✦", [
-        item("/enterprise/tools", "AI工具中心", "Tools", "◇"),
-        item("/enterprise/knowledge/agent", "企业智库", "Knowledge", "▤"),
-        item("/enterprise/creation/agent", "AI创作配置", "Creation", "✎"),
-        item("/enterprise/outreach/agent", "AI拓客配置", "Outreach", "↑"),
-        item("/enterprise/personalwx/agent", "个微Agent", "Personal WX", "私"),
-        item("/enterprise/corpwx/agent", "企微Agent", "Corp WX", "企")
+      group("business", "业务", "Business", "B", [
+        comingSoon("数据分析", "Analytics", "A"),
+        comingSoon("拓客中心", "Leads", "L"),
+        comingSoon("报告", "Reports", "R"),
+        item("/enterprise/billing", "成本中心", "Cost Center", "C")
       ]),
-      group("results", "业务结果", "Business Results", "📊", [
-        item("/enterprise/billing", "费用中心", "Billing", "💰"),
-        item("/enterprise/tools/agent-logs", "调用日志", "Logs", "≡")
+      group("infrastructure", "基础设施", "Infrastructure", "I", [
+        item("/enterprise/tools", "工具箱", "Toolbox", "T"),
+        item("/enterprise/model-configs", "模型", "Models", "M"),
+        comingSoon("集成", "Integrations", "I"),
+        item(null, "设置", "Settings", "S", {
+          key: "settings",
+          children: [
+            item("/enterprise/tools/agent-config", "Agent 总配置", "Agent Config", "A"),
+            item("/enterprise/tools/agent-logs", "调用日志", "Logs", "L"),
+            item("/enterprise/energy-center", "AI 能源中心", "Energy Center", "E"),
+            comingSoon("通用配置", "General Settings", "G")
+          ]
+        })
       ]),
-      group("system", "系统管理", "System", "⚙", [
-        item("/enterprise/energy-center", "AI能源中心", "Energy Center", "⚡"),
-        item("/enterprise/model-configs", "模型配置", "Models", "◫"),
-        item("/enterprise/tools/agent-config", "Agent总配置", "Gateway", "◉")
+      group("portals", "入口", "Portals", "P", [
+        item("/talent/home", "员工入口", "Employee Portal", "E"),
+        item("/government/dashboard", "政府入口", "Government Portal", "G"),
+        item("/alliance/dashboard", "联盟入口", "Alliance Portal", "A")
+      ]),
+      group("future", "未来功能", "Future", "F", [
+        comingSoon("计算中心", "Compute Center", "C"),
+        comingSoon("Agent 市场", "Agent Marketplace", "A"),
+        comingSoon("模型中心", "Model Hub", "M"),
+        comingSoon("API 网关", "API Gateway", "G")
       ])
     ]
   },
@@ -171,9 +215,17 @@ const portal = computed(() => {
   return portals.enterprise;
 });
 
-const flatItems = computed(() => portal.value.groups.flatMap((navGroup) => navGroup.items));
+function flattenItems(items) {
+  return items.flatMap((navItem) => [
+    navItem,
+    ...(navItem.children ? flattenItems(navItem.children) : [])
+  ]);
+}
+
+const flatItems = computed(() => portal.value.groups.flatMap((navGroup) => flattenItems(navGroup.items)));
 const currentItem = computed(() =>
   [...flatItems.value]
+    .filter((navItem) => navItem.path)
     .sort((left, right) => right.path.length - left.path.length)
     .find(
       (navItem) =>
@@ -181,13 +233,28 @@ const currentItem = computed(() =>
     )
 );
 const currentPageTitle = computed(() => currentItem.value?.label || portal.value.title);
+const headerDate = computed(() => {
+  const date = new Date();
+  const weekday = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"][date.getDay()];
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}.${month}.${day} ${weekday}`;
+});
 
 function isRouteActive(path) {
-  return currentItem.value?.path === path;
+  return Boolean(path) && currentItem.value?.path === path;
+}
+
+function isItemActive(navItem) {
+  return (
+    isRouteActive(navItem.path) ||
+    Boolean(navItem.children?.some((child) => isItemActive(child)))
+  );
 }
 
 function groupHasActiveRoute(navGroup) {
-  return navGroup.items.some((navItem) => isRouteActive(navItem.path));
+  return navGroup.items.some((navItem) => isItemActive(navItem));
 }
 
 function isGroupOpen(key) {
@@ -222,6 +289,15 @@ function toggleGroup(key) {
     return;
   }
   openGroups[key] = !isGroupOpen(key);
+}
+
+function handleItemClick(navItem) {
+  if (navItem.disabled || !navItem.path) return;
+  router.push(navItem.path);
+}
+
+function createTask() {
+  router.push({ path: "/enterprise/workflows", query: { create: "1" } });
 }
 
 watch(

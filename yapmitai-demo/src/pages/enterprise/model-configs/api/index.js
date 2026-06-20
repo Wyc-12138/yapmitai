@@ -1,4 +1,5 @@
 import { API_BASE, API_KEY } from "../../../../apiConfig.js";
+import { parseApiResponse } from "../../../../apiResponse.js";
 
 async function request(path, options = {}) {
   const response = await fetch(`${API_BASE}${path}`, {
@@ -10,11 +11,7 @@ async function request(path, options = {}) {
     }
   });
 
-  if (!response.ok) {
-    const payload = await response.json().catch(() => ({}));
-    throw new Error(payload.msg || payload.detail || `模型配置接口请求失败：${response.status}`);
-  }
-  return response.json();
+  return parseApiResponse(response, "模型配置接口请求失败");
 }
 
 export function getModelConfigs(params = {}) {

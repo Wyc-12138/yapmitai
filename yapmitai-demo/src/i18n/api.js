@@ -1,4 +1,5 @@
 import { API_BASE, API_KEY } from "../apiConfig.js";
+import { parseApiResponse } from "../apiResponse.js";
 
 export async function translateTexts(texts) {
   const response = await fetch(`${API_BASE}/translations/batch`, {
@@ -9,10 +10,7 @@ export async function translateTexts(texts) {
     },
     body: JSON.stringify({ texts })
   });
-  if (!response.ok) {
-    const payload = await response.json().catch(() => ({}));
-    throw new Error(payload.msg || payload.detail || `翻译请求失败：${response.status}`);
-  }
-  const payload = await response.json();
+
+  const payload = await parseApiResponse(response, "翻译请求失败");
   return payload.data?.translations || {};
 }

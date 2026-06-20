@@ -1,4 +1,5 @@
 import { API_BASE, API_KEY } from "../../../../apiConfig.js";
+import { normalizeApiResponse } from "../../../../apiResponse.js";
 
 const FIELD_LABELS = {
   name: "团队名称",
@@ -7,7 +8,13 @@ const FIELD_LABELS = {
 };
 
 function getErrorMessage(payload, status) {
-  const issue = Array.isArray(payload?.data) ? payload.data[0] : null;
+  const issues = Array.isArray(payload?.data)
+    ? payload.data
+    : Array.isArray(payload?.data?.list)
+      ? payload.data.list
+      : [];
+  const issue = issues[0];
+
   if (issue) {
     const field = issue.loc?.[issue.loc.length - 1];
     const label = FIELD_LABELS[field] || field || "请求参数";
@@ -16,6 +23,7 @@ function getErrorMessage(payload, status) {
     }
     return `${label}：${issue.msg || "格式不正确"}`;
   }
+
   return payload?.msg || payload?.detail || `请求失败：${status}`;
 }
 
@@ -28,11 +36,13 @@ async function request(path, options = {}) {
       ...options.headers
     }
   });
-  if (!response.ok) {
-    const payload = await response.json().catch(() => ({}));
+
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok || payload?.success === false) {
     throw new Error(getErrorMessage(payload, response.status));
   }
-  return response.json();
+
+  return normalizeApiResponse(payload);
 }
 
 export const teamsApi = {
