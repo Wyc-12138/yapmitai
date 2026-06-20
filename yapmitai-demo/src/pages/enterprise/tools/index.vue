@@ -135,8 +135,35 @@ const mediaPollTimer = ref(null);
 
 // ── localStorage history ──
 const MEDIA_HISTORY_KEY = "yapmitai-demo-media-history";
-function loadMediaHistory() { try { return JSON.parse(localStorage.getItem(MEDIA_HISTORY_KEY) || "[]"); } catch { return []; } }
-function saveMediaHistory(entry) { const list = [entry, ...loadMediaHistory()].slice(0, 10); localStorage.setItem(MEDIA_HISTORY_KEY, JSON.stringify(list)); }
+function normalizeMediaUrl(url) {
+  if (!url) return "";
+  if (url.startsWith("/")) {
+    return `${window.location.origin}${url}`.replace(/^https:/, "http:");
+  }
+
+  try {
+    const parsed = new URL(url);
+    parsed.protocol = "http:";
+    return parsed.toString();
+  } catch {
+    return url;
+  }
+}
+function normalizeMediaResult(item) {
+  return { ...item, url: normalizeMediaUrl(item.url) };
+}
+function loadMediaHistory() {
+  try {
+    return JSON.parse(localStorage.getItem(MEDIA_HISTORY_KEY) || "[]").map(normalizeMediaResult);
+  } catch {
+    return [];
+  }
+}
+function saveMediaHistory(entry) {
+  const list = [normalizeMediaResult(entry), ...loadMediaHistory()].slice(0, 10);
+  localStorage.setItem(MEDIA_HISTORY_KEY, JSON.stringify(list));
+  recentMediaHistory.value = list;
+}
 const emptyForm = () => ({ id: null, name: "", nameEn: "", code: "", category: "内容生成", description: "", icon: "技", modelConfigId: null, promptTemplate: "请基于任务简报完成该AI工具任务：{{task}}", enabled: true, isSystem: false, sortOrder: 100 });
 const form = reactive(emptyForm());
 const visible = computed(() => {
@@ -165,7 +192,7 @@ async function runMediaGenerate() {
   try {
     if (mediaType.value === "image") {
       const resp = await demoMediaApi.textToImage({ prompt: mediaForm.prompt, size: mediaForm.size, style: mediaForm.style, quantity: mediaForm.quantity });
-      mediaResults.value = resp.data || [];
+      mediaResults.value = (resp.data || []).map(normalizeMediaResult);
       mediaResults.value.forEach(r => saveMediaHistory({ type: "image", prompt: mediaForm.prompt, url: r.url, filename: r.filename, createdAt: new Date().toISOString() }));
     } else {
       const resp = await demoMediaApi.textToVideo({ prompt: mediaForm.prompt, ratio: mediaForm.ratio, duration: mediaForm.duration, style: mediaForm.style });
@@ -184,7 +211,7 @@ function startVideoPolling() {
       mediaTaskStatus.value = resp.data.status;
       if (resp.data.status === "completed") {
         clearInterval(mediaPollTimer.value); mediaPollTimer.value = null;
-        mediaResults.value = [{ url: resp.data.url, filename: resp.data.filename }];
+        mediaResults.value = [normalizeMediaResult({ url: resp.data.url, filename: resp.data.filename })];
         saveMediaHistory({ type: "video", prompt: mediaForm.prompt, url: resp.data.url, filename: resp.data.filename, createdAt: new Date().toISOString() });
       } else if (resp.data.status === "failed") {
         clearInterval(mediaPollTimer.value); mediaPollTimer.value = null;
