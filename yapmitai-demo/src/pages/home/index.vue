@@ -13,7 +13,7 @@
           <span class="nav-ask-dot"></span>
           Ask Me
         </button>
-        <button type="button" class="nav-login" @click="enterPortal('/enterprise/dashboard')">登录系统</button>
+        <button type="button" class="nav-login" @click="enterPortal('/yapmit-login')">登录系统</button>
       </div>
     </nav>
 
@@ -29,7 +29,7 @@
           <button type="button" class="btn-ask" @click="askMeOpen = true">
             <span style="font-size: 16px">💬</span> Ask Me AI
           </button>
-          <button type="button" class="btn-ghost" @click="enterPortal('/enterprise/dashboard')">登录系统</button>
+          <button type="button" class="btn-ghost" @click="enterPortal('/yapmit-login')">登录系统</button>
         </div>
       </section>
 
@@ -132,7 +132,7 @@
           <button type="button" class="footer-link" @click="askMeOpen = true">Ask Me</button>
           <button type="button" class="footer-link">联系我们</button>
         </div>
-        <div class="footer-copy">© 2025 YAPMITAI Inc. · AI makes you better · yapmitai.com</div>
+        <div class="footer-copy">© 2026 YAPMITAI Inc. · AI makes you better · yapmitai.com</div>
       </footer>
     </div>
 

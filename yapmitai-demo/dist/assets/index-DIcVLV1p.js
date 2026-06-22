@@ -1,0 +1,1 @@
+import{c as s,a as e,o as a}from"./index-BUPvnCQ5.js";const o={__name:"index",setup(l){return(n,t)=>(a(),s("div",null,[...t[0]||(t[0]=[e("div",{class:"page-title"},[e("span",{class:"eyebrow"},"Energy Center"),e("h1",null,"AI能源中心"),e("p",null,"AI算力与能源监控")],-1),e("div",{class:"empty-state"},"AI能源中心 — 页面建设中",-1)])]))}};export{o as default};

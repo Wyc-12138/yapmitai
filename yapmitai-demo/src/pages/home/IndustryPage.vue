@@ -60,7 +60,7 @@
     <footer>
       <div class="footer-logo">YAPMIT<span>AI</span></div>
       <div class="footer-links"><button type="button" class="footer-link" @click="$emit('back')">返回主页</button></div>
-      <div class="footer-copy">© 2025 YAPMITAI Inc. · AI makes you better</div>
+      <div class="footer-copy">© 2026 YAPMITAI Inc. · AI makes you better</div>
     </footer>
   </div>
 </template>

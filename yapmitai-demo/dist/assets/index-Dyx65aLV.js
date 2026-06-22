@@ -1,1 +1,0 @@
-import{c as s,a as e,o as t}from"./index-BYzGDam2.js";const r={__name:"index",setup(a){return(n,l)=>(t(),s("div",null,[...l[0]||(l[0]=[e("div",{class:"page-title"},[e("span",{class:"eyebrow"},"Billing"),e("h1",null,"费用中心"),e("p",null,"费用概览与账单管理")],-1),e("div",{class:"empty-state"},"费用中心 — 页面建设中",-1)])]))}};export{r as default};

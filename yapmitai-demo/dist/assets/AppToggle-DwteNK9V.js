@@ -1,0 +1,1 @@
+import{o as a,c as t,a as n,d as s}from"./index-BUPvnCQ5.js";const p={__name:"AppToggle",props:{modelValue:Boolean},emits:["update:modelValue"],setup(l){return(o,e)=>(a(),t("button",{class:s(["toggle",{on:l.modelValue}]),onClick:e[0]||(e[0]=u=>o.$emit("update:modelValue",!l.modelValue))},[...e[1]||(e[1]=[n("span",null,null,-1)])],2))}};export{p as A};

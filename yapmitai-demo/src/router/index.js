@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from "vue-router";
 
 const routes = [
   { path: "/", component: () => import("../pages/home/index.vue"), meta: { layout: "full" } },
+  { path: "/yapmit-login", component: () => import("../pages/login/index.vue"), meta: { layout: "full" } },
   { path: "/enterprise/dashboard", component: () => import("../pages/enterprise/dashboard/index.vue") },
   { path: "/enterprise/agents", component: () => import("../pages/enterprise/agents/index.vue") },
   { path: "/enterprise/teams", component: () => import("../pages/enterprise/teams/index.vue") },
