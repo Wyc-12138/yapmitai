@@ -1,54 +1,182 @@
 <template>
-  <div class="landing-page">
-    <header class="landing-nav">
-      <button class="brand light-brand" @click="router.push('/')"><span class="yapmitai-wordmark">YAPMITAI</span></button>
-      <nav class="landing-menu">
-        <div v-for="portal in portals" :key="portal.label" class="landing-menu-item">
-          <button @click="router.push(portal.path)">{{ portal.label }}</button>
-          <div class="landing-mega">
-            <button v-for="(page, index) in portal.pages" :key="page.path" :class="{ featured: index === 0 }" @click="router.push(page.path)">
-              <strong>{{ page.title }}</strong><span>{{ page.description }}</span>
+  <div class="os-landing">
+    <nav>
+      <button type="button" class="nav-logo" @click="goHome">YAPMIT<span>AI</span></button>
+      <ul class="nav-center">
+        <li><button type="button" :class="{ active: activePage === 'home' }" @click="goHome">平台</button></li>
+        <li v-for="portal in portals" :key="portal.key">
+          <button type="button" class="nav-portal" @click="enterPortal(portal.path)">{{ portal.label }}</button>
+        </li>
+      </ul>
+      <div class="nav-right">
+        <button type="button" class="nav-ask" @click="askMeOpen = true">
+          <span class="nav-ask-dot"></span>
+          Ask Me
+        </button>
+        <button type="button" class="nav-login" @click="enterPortal('/enterprise/dashboard')">登录系统</button>
+      </div>
+    </nav>
+
+    <div v-if="activePage === 'home'" class="page">
+      <section class="hero">
+        <div class="hero-grid"></div>
+        <div class="hero-orb"></div>
+        <div class="hero-badge"><span class="badge-dot"></span>AI Operating System · yapmitai.com</div>
+        <h1>行业智能<br>从 <em>底座</em> 开始</h1>
+        <p class="hero-sub">YAPMIT AI OS 将大模型能力封装为垂直行业标准化工作流——品牌增长、跨境出海、导购文旅、招商引资，一套底座，四个行业空间。</p>
+        <div class="hero-actions">
+          <button type="button" class="btn-primary" @click="scrollToIndustry">探索行业空间</button>
+          <button type="button" class="btn-ask" @click="askMeOpen = true">
+            <span style="font-size: 16px">💬</span> Ask Me AI
+          </button>
+          <button type="button" class="btn-ghost" @click="enterPortal('/enterprise/dashboard')">登录系统</button>
+        </div>
+      </section>
+
+      <div class="login-portal">
+        <div class="login-portal-inner">
+          <span class="portal-label">登录入口</span>
+          <div class="portal-divider"></div>
+          <div class="portal-cards">
+            <button
+              v-for="portal in portals"
+              :key="portal.key"
+              type="button"
+              class="portal-card"
+              @click="enterPortal(portal.path)"
+            >
+              <div class="portal-icon">{{ portal.emoji }}</div>
+              <div class="portal-info">
+                <div class="portal-name">{{ portal.label }}</div>
+                <div class="portal-hint">{{ portal.desc }}</div>
+              </div>
             </button>
           </div>
         </div>
-      </nav>
-      <button class="landing-login" @click="router.push('/enterprise/dashboard')">进入系统</button>
-    </header>
-    <section class="landing-hero">
-      <div class="landing-copy">
-        <span class="landing-kicker">YAPMITAI Demo v2.0</span>
-        <h1>悦普AI产业超级操作系统</h1>
-        <p>四个入口，四套边界。企业管理 AI 员工与工具，员工完成日常任务，政府查看产业态势，联盟推进品牌增长。</p>
-        <div class="landing-actions"><button class="primary-btn" @click="router.push('/enterprise/dashboard')">开始使用</button><button class="ghost-btn" @click="router.push('/enterprise/tools')">查看AI工具</button></div>
       </div>
-      <div class="landing-visual" aria-hidden="true">
-        <div class="visual-window"><div class="visual-question">What should the team focus on this week?</div><div class="visual-content"><section><span>Summary</span><strong>AI contribution is rising across tools and knowledge workflows.</strong><div class="visual-chart"><i v-for="n in 5" :key="n"></i></div></section><section><span>Recommendations</span><p>Prioritize customer reply automation.</p><p>Connect local knowledge bases.</p><p>Review model costs weekly.</p></section></div><div class="visual-input">Ask a follow-up question <b>Ask</b></div></div>
+
+      <div class="askme-banner-wrap">
+        <div class="askme-banner" @click="askMeOpen = true">
+          <div class="askme-left">
+            <div class="askme-icon">💬</div>
+            <div>
+              <div class="askme-title">Ask Me — AI 智能问答</div>
+              <div class="askme-desc">基于 YAPMIT 自建知识库、产品库、行业数据库，像 Perplexity 一样直接问，立刻得到行业专属答案。</div>
+            </div>
+          </div>
+          <button type="button" class="askme-action" @click.stop="askMeOpen = true">立即体验 →</button>
+        </div>
       </div>
-    </section>
-    <section class="portal-grid">
-      <button v-for="(portal, index) in portals" :key="portal.path" class="portal-card" :style="{ animationDelay: `${index * 70}ms` }" @click="router.push(portal.path)">
-        <span>{{ portal.icon }}</span><strong>{{ portal.title }}</strong><small>{{ portal.en }}</small><p>{{ portal.desc }}</p><em>{{ portal.scope }}</em>
-      </button>
-    </section>
+
+      <div class="stats-bar">
+        <div v-for="item in stats" :key="item.label" class="stat">
+          <div class="stat-number">{{ item.value }}</div>
+          <div class="stat-label">{{ item.label }}</div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-eyebrow">系统架构</div>
+        <div class="section-title">一个 OS，驱动四个行业</div>
+        <div class="section-desc">从底层算力到顶层行业应用，YAPMIT AI OS 提供完整垂直栈——每一层独立可调用，也可协同运作。</div>
+        <div class="os-stack">
+          <template v-for="(layer, index) in osStackLayers" :key="layer.name">
+            <div v-if="index > 0" class="stack-connector"></div>
+            <div class="stack-layer">
+              <div class="stack-icon" :style="{ background: layer.bg }">{{ layer.icon }}</div>
+              <div class="stack-info">
+                <div class="stack-name">{{ layer.name }}</div>
+                <div class="stack-desc">{{ layer.desc }}</div>
+              </div>
+              <div class="stack-tag">{{ layer.tag }}</div>
+            </div>
+          </template>
+        </div>
+      </div>
+
+      <div id="industry-section" class="section" style="padding-top: 0">
+        <div class="section-eyebrow">行业空间</div>
+        <div class="section-title">选择你的行业</div>
+        <div class="section-desc">每个 Industry Space 内置专属 Agent Team、Skill 库和工作流模板，开箱即用。</div>
+        <div class="industry-grid">
+          <button
+            v-for="card in industryCards"
+            :key="card.slug"
+            type="button"
+            class="industry-card"
+            :class="card.cardClass"
+            @click="showIndustry(card.slug)"
+          >
+            <div class="card-icon-wrap">{{ card.icon }}</div>
+            <div class="card-title">{{ card.title }} <span class="card-tag">{{ card.tag }}</span></div>
+            <div class="card-subtitle">{{ card.subtitle }}</div>
+            <div class="card-desc">{{ card.desc }}</div>
+            <div class="card-features">
+              <div v-for="feature in card.features" :key="feature" class="card-feature">{{ feature }}</div>
+            </div>
+            <div class="card-cta">
+              深入了解
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <path d="M2 7h10M7 2l5 5-5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <footer>
+        <div class="footer-logo">YAPMIT<span>AI</span></div>
+        <div class="footer-links">
+          <button type="button" class="footer-link">关于我们</button>
+          <button type="button" class="footer-link">文档</button>
+          <button type="button" class="footer-link" @click="askMeOpen = true">Ask Me</button>
+          <button type="button" class="footer-link">联系我们</button>
+        </div>
+        <div class="footer-copy">© 2025 YAPMITAI Inc. · AI makes you better · yapmitai.com</div>
+      </footer>
+    </div>
+
+    <IndustryPage
+      v-else-if="currentIndustry"
+      :data="currentIndustry"
+      @back="goHome"
+      @ask-me="askMeOpen = true"
+    />
+
+    <AskMeModal v-model:open="askMeOpen" />
   </div>
 </template>
+
 <script setup>
+import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
+import AskMeModal from "./AskMeModal.vue";
+import IndustryPage from "./IndustryPage.vue";
+import { industries, industryCards, osStackLayers, stats } from "./industry-data.js";
+import { portals } from "./portals.js";
+import "./os-landing.css";
+
 const router = useRouter();
-const portals = [
-  { path: "/enterprise/dashboard", label: "企业", title: "企业入口", en: "Enterprise", desc: "AI增长平台与超级员工", icon: "企", scope: "经营、工具、知识库、模型配置", pages: [
-    { path: "/enterprise/dashboard", title: "企业控制台", description: "查看经营指标、任务队列与AI贡献。" },
-    { path: "/enterprise/agents", title: "超级AI员工", description: "像管理团队一样管理AI员工。" },
-    { path: "/enterprise/tools", title: "AI工具中心", description: "使用Prompt Skills完成业务任务。" },
-    { path: "/enterprise/knowledge/agent", title: "企业智库", description: "管理本地知识库与RAG问答。" },
-    { path: "/enterprise/model-configs", title: "模型配置", description: "配置Chat和Embedding模型。" },
-    { path: "/enterprise/tools/agent-config", title: "Agent总配置", description: "管理网关、模块和连接测试。" },
-    { path: "/enterprise/creation/agent", title: "AI创作配置", description: "配置图片、视频和内容生成能力。" },
-    { path: "/enterprise/tools/agent-logs", title: "调用日志", description: "查看接口、模型调用和异常。" }
-  ]},
-  { path: "/talent/home", label: "员工", title: "员工入口", en: "Talent", desc: "个人AI工作台", icon: "人", scope: "任务、助手、个人效率", pages: [{ path: "/talent/home", title: "员工工作台", description: "处理日常任务并使用个人AI助手。" }] },
-  { path: "/government/dashboard", label: "政府", title: "政府入口", en: "Government", desc: "产业AI决策驾驶舱", icon: "政", scope: "产业运行、政策问答、宏观指标", pages: [{ path: "/government/dashboard", title: "政府驾驶舱", description: "查看产业运行、企业分布和政策问答。" }] },
-  { path: "/alliance/dashboard", label: "联盟", title: "联盟入口", en: "Alliance", desc: "品牌增长计划网络", icon: "盟", scope: "成员协同、增长计划、联盟看板", pages: [{ path: "/alliance/dashboard", title: "产业联盟", description: "管理联盟成员和品牌增长计划。" }] }
-];
+const activePage = ref("home");
+const askMeOpen = ref(false);
+
+const currentIndustry = computed(() => industries[activePage.value] || null);
+
+function enterPortal(path) {
+  router.push(path);
+}
+
+function goHome() {
+  activePage.value = "home";
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function showIndustry(slug) {
+  activePage.value = slug;
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function scrollToIndustry() {
+  document.getElementById("industry-section")?.scrollIntoView({ behavior: "smooth" });
+}
 </script>
-<style scoped></style>
