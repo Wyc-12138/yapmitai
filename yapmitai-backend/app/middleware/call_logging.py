@@ -17,20 +17,23 @@ class CallLoggingMiddleware(BaseHTTPMiddleware):
         if "/api/v1/" in request.url.path:
             path_parts = request.url.path.split("/")
             module = path_parts[3] if len(path_parts) > 3 else "system"
-            async with AsyncSessionLocal() as session:
-                session.add(
-                    AgentCallLog(
-                        agent_id="http-api",
-                        module=module,
-                        path=request.url.path,
-                        method=request.method,
-                        request_at=started_at,
-                        response_at=datetime.now(UTC),
-                        status="success" if response.status_code < 400 else "failed",
-                        latency_ms=latency_ms,
-                        cost=0,
+            try:
+                async with AsyncSessionLocal() as session:
+                    session.add(
+                        AgentCallLog(
+                            agent_id="http-api",
+                            module=module,
+                            path=request.url.path,
+                            method=request.method,
+                            request_at=started_at,
+                            response_at=datetime.now(UTC),
+                            status="success" if response.status_code < 400 else "failed",
+                            latency_ms=latency_ms,
+                            cost=0,
+                        )
                     )
-                )
-                await session.commit()
+                    await session.commit()
+            except Exception:
+                pass
         response.headers["X-Trace-Latency-Ms"] = str(latency_ms)
         return response

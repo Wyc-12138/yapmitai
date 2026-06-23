@@ -155,13 +155,16 @@ async def upload_collection(
     db: AsyncSession = Depends(get_db),
 ) -> dict:
     content = await file.read()
-    collection = await service.add_document(
-        db=db,
-        library_id=library_id,
-        filename=file.filename or "unnamed",
-        content_type=file.content_type,
-        content=content,
-    )
+    try:
+        collection = await service.add_document(
+            db=db,
+            library_id=library_id,
+            filename=file.filename or "unnamed",
+            content_type=file.content_type,
+            content=content,
+        )
+    except ValueError as exc:
+        raise InvalidParameterError(str(exc)) from exc
     if not collection:
         raise HTTPException(status_code=404, detail="Local knowledge library not found")
     return success(collection)

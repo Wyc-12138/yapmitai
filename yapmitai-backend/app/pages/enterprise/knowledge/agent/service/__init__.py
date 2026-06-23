@@ -131,6 +131,27 @@ def extract_docx_text(content: bytes) -> str:
     return "\n".join(paragraphs)
 
 
+def extract_pdf_text(content: bytes) -> str:
+    try:
+        from pypdf import PdfReader
+    except ImportError as exc:
+        raise ValueError("PDF parsing is not available. Install pypdf on the backend.") from exc
+
+    try:
+        reader = PdfReader(BytesIO(content))
+    except Exception as exc:
+        raise ValueError("Unable to parse PDF file. Please verify the file is not corrupted.") from exc
+
+    pages: list[str] = []
+    for page in reader.pages:
+        text = page.extract_text() or ""
+        if text.strip():
+            pages.append(text)
+    if not pages:
+        raise ValueError("No extractable text was found in this PDF. Scanned PDFs need OCR first.")
+    return "\n".join(pages)
+
+
 async def status(db: AsyncSession) -> dict:
     bases = await db.scalar(select(func.count()).select_from(KnowledgeBase))
     documents = await db.scalar(select(func.count()).select_from(KnowledgeDocument))
@@ -393,11 +414,16 @@ async def add_document(
         ):
             source_kind = "docx"
             text_content = extract_docx_text(content)
+        elif safe_name.lower().endswith(".pdf") or content_type == "application/pdf":
+            source_kind = "pdf"
+            text_content = extract_pdf_text(content)
         else:
             raise ValueError(
                 f"暂不支持解析文件类型：{safe_name}。当前支持 TXT、Markdown、DOCX 和图片"
             )
         chunks = split_text(text_content)
+        if not chunks:
+            raise ValueError(f"No extractable text was found in {safe_name}.")
         embeddings = await external_ai_service.embed_with_config(chunks, embedding_config)
         upsert_chunks(library_id, document_id, chunks, embeddings, safe_name)
         document.processing_status = "indexed"

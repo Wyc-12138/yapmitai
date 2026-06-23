@@ -1,6 +1,7 @@
 import base64
 import time
 from datetime import UTC, datetime
+from json import JSONDecodeError
 from typing import Any
 
 import httpx
@@ -33,9 +34,12 @@ class ExternalAIService:
         if not self.configured:
             raise AgentUnavailableError("External AI API key is not configured")
 
-        payload = {"model": model, "input": texts}
-        data = await self._post("/embeddings", payload)
-        return [item["embedding"] for item in data["data"]]
+        return await self._embed_batches(
+            texts,
+            model=model,
+            api_base_url=None,
+            api_key=None,
+        )
 
     async def embed_with_config(
         self, texts: list[str], config: ModelConfig | None
@@ -53,14 +57,34 @@ class ExternalAIService:
             raise AgentUnavailableError(
                 f"Embedding model '{config.display_name}' API key is not configured"
             )
-        payload = {"model": config.model_code, "input": texts}
-        data = await self._post(
-            "/embeddings",
-            payload,
+        return await self._embed_batches(
+            texts,
+            model=config.model_code,
             api_base_url=config.api_base_url,
             api_key=api_key,
         )
-        return [item["embedding"] for item in data["data"]]
+
+    async def _embed_batches(
+        self,
+        texts: list[str],
+        *,
+        model: str,
+        api_base_url: str | None,
+        api_key: str | None,
+        batch_size: int = 10,
+    ) -> list[list[float]]:
+        embeddings: list[list[float]] = []
+        for index in range(0, len(texts), batch_size):
+            batch = texts[index : index + batch_size]
+            payload = {"model": model, "input": batch}
+            data = await self._post(
+                "/embeddings",
+                payload,
+                api_base_url=api_base_url,
+                api_key=api_key,
+            )
+            embeddings.extend(item["embedding"] for item in data["data"])
+        return embeddings
 
     async def answer(
         self,
@@ -266,9 +290,6 @@ class ExternalAIService:
         api_base_url: str | None = None,
         api_key: str | None = None,
     ) -> dict[str, Any]:
-        from app.db.database import AsyncSessionLocal
-        from app.models import AgentCallLog
-
         url = f"{(api_base_url or self.settings.external_ai_base_url).rstrip('/')}{path}"
         headers = {
             "Authorization": f"Bearer {api_key or self.settings.external_ai_api_key}",
@@ -282,26 +303,22 @@ class ExternalAIService:
             ) as client:
                 response = await client.post(url, headers=headers, json=payload)
                 response.raise_for_status()
-                data = response.json()
+                try:
+                    data = response.json()
+                except JSONDecodeError as exc:
+                    body = response.text.strip()
+                    detail = body[:300] if body else "empty response body"
+                    raise AgentUnavailableError(
+                        f"External AI API returned non-JSON response: {detail}"
+                    ) from exc
             usage = data.get("usage", {})
-            async with AsyncSessionLocal() as session:
-                session.add(
-                    AgentCallLog(
-                        agent_id=None,
-                        module="embedding" if path == "/embeddings" else "answer",
-                        path=path,
-                        method="POST",
-                        request_at=started_at,
-                        response_at=datetime.now(UTC),
-                        status="success",
-                        latency_ms=round((time.perf_counter() - started) * 1000),
-                        cost=0,
-                        prompt_tokens=usage.get("prompt_tokens", 0),
-                        completion_tokens=usage.get("completion_tokens", 0),
-                        total_tokens=usage.get("total_tokens", 0),
-                    )
-                )
-                await session.commit()
+            await self._write_call_log(
+                path=path,
+                started_at=started_at,
+                started=started,
+                status="success",
+                usage=usage,
+            )
             return data
         except httpx.HTTPError as exc:
             upstream_detail = ""
@@ -321,6 +338,30 @@ class ExternalAIService:
                 if upstream_detail
                 else f"External AI API request failed: {exc}"
             )
+            await self._write_call_log(
+                path=path,
+                started_at=started_at,
+                started=started,
+                status="failed",
+                error_msg=error_message,
+            )
+            raise AgentUnavailableError(error_message) from exc
+
+    async def _write_call_log(
+        self,
+        *,
+        path: str,
+        started_at: datetime,
+        started: float,
+        status: str,
+        usage: dict[str, Any] | None = None,
+        error_msg: str | None = None,
+    ) -> None:
+        from app.db.database import AsyncSessionLocal
+        from app.models import AgentCallLog
+
+        usage = usage or {}
+        try:
             async with AsyncSessionLocal() as session:
                 session.add(
                     AgentCallLog(
@@ -330,14 +371,18 @@ class ExternalAIService:
                         method="POST",
                         request_at=started_at,
                         response_at=datetime.now(UTC),
-                        status="failed",
+                        status=status,
                         latency_ms=round((time.perf_counter() - started) * 1000),
                         cost=0,
-                        error_msg=error_message,
+                        prompt_tokens=usage.get("prompt_tokens", 0),
+                        completion_tokens=usage.get("completion_tokens", 0),
+                        total_tokens=usage.get("total_tokens", 0),
+                        error_msg=error_msg,
                     )
                 )
                 await session.commit()
-            raise AgentUnavailableError(error_message) from exc
+        except Exception:
+            return
 
 
 external_ai_service = ExternalAIService()

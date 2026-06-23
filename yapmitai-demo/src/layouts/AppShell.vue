@@ -139,7 +139,7 @@ const portals = {
       group("overview", "总览", "Overview", "O", [
         item("/enterprise/dashboard", "控制台", "Dashboard", "D"),
         comingSoon("任务", "Tasks", "T"),
-        item("/enterprise/workflows", "工作流工作室", "Workflow Studio", "W")
+        item("/enterprise/workflows", "工作流", "Workflow Studio", "W")
       ]),
       group("workforce", "AI 劳动力", "Workforce", "W", [
         item("/enterprise/agents", "AI 员工", "AI Employees", "AI"),

@@ -1,1 +1,0 @@
-import{o as a,c as n,a as e,t as s,J as o}from"./index-BUPvnCQ5.js";const i={class:"panel"},r={class:"panel-head"},u={__name:"AppPanel",props:{title:String,subtitle:String},setup(t){return(l,c)=>(a(),n("section",i,[e("div",r,[e("div",null,[e("h2",null,s(t.title),1),e("span",null,s(t.subtitle),1)])]),o(l.$slots,"default")]))}};export{u as A};

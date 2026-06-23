@@ -8,13 +8,13 @@
     </AppPanel>
     <div class="config-list">
       <article v-for="field in config.fields" :key="field" class="config-row">
-        <span>设</span><span>{{ field }}</span><AppToggle :model-value="source !== '关闭'" />
+        <span>设置</span><span>{{ field }}</span><AppToggle v-model="enabled" />
       </article>
     </div>
   </section>
 </template>
 <script setup>
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import AppPanel from "./AppPanel.vue";
 import AppToggle from "./AppToggle.vue";
 import PageHeader from "./PageHeader.vue";
@@ -22,6 +22,13 @@ const props = defineProps({ config: { type: Object, required: true } });
 const sources = ["外部Agent", "原生模块", "关闭"];
 const key = `${props.config.type}-agent-source`;
 const source = ref(JSON.parse(localStorage.getItem(key) || '"外部Agent"'));
+const enabled = computed({
+  get: () => source.value !== "关闭",
+  set: (val) => {
+    source.value = val ? sources[0] : sources[2];
+    localStorage.setItem(key, JSON.stringify(source.value));
+  }
+});
 function setSource(value) {
   source.value = value;
   localStorage.setItem(key, JSON.stringify(value));

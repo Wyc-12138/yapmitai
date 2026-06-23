@@ -14,8 +14,12 @@ const props = defineProps({
   data: { type: Array, required: true }, aKey: String, bKey: String,
   aLabel: String, bLabel: String, compact: Boolean
 });
-const max = computed(() => Math.max(...props.data.flatMap((item) => [item[props.aKey], item[props.bKey]])));
+const max = computed(() => {
+  const values = props.data.flatMap((item) => [item[props.aKey], item[props.bKey]]).filter(v => v != null);
+  return values.length ? Math.max(...values) : 1;
+});
 function points(key) {
+  if (props.data.length < 2) return "0,100 100,100";
   return props.data.map((item, index) =>
     `${index * (100 / (props.data.length - 1))},${100 - item[key] / max.value * 86}`
   ).join(" ");

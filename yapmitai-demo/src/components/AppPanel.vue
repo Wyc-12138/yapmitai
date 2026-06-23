@@ -1,7 +1,7 @@
 <template>
   <section class="panel">
     <div class="panel-head"><div><h2>{{ title }}</h2><span>{{ subtitle }}</span></div></div>
-    <slot />
+    <div class="panel-body"><slot /></div>
   </section>
 </template>
 <script setup>

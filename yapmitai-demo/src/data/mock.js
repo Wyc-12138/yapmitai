@@ -6,53 +6,53 @@ export const stats = [
 ];
 
 export const enterpriseKpis = [
-  { title: "今日询盘线索", value: "47", unit: "条", trend: "↑ 12% 较昨日", color: "#10b981" },
-  { title: "新增用户", value: "238", unit: "人", trend: "↑ 8% 较本月均值", color: "#3b82f6" },
-  { title: "投流ROI", value: "3.8", unit: "x", trend: "↑ 0.4 较上周", color: "#f59e0b" },
-  { title: "本月AI任务完成", value: "156", unit: "/ 180", trend: "完成率 86.7%", color: "#8b5cf6" },
-  { title: "本月费用消耗", value: "¥2.4", unit: "万", trend: "↑ 预算余量 38%", color: "#ef4444" }
+  { title: "今日询盘线索", value: "47", unit: "条", delta: "↑ 12% 较昨日", deltaClass: "up", icon: "📥", color: "#10b981" },
+  { title: "新增用户", value: "238", unit: "人", delta: "↑ 8% 较本月均值", deltaClass: "up", icon: "👤", color: "#3b82f6" },
+  { title: "投流ROI", value: "3.8", unit: "x", delta: "↑ 0.4 较上周", deltaClass: "up", icon: "💹", color: "#f59e0b" },
+  { title: "本月AI任务完成", value: "156", unit: "/ 180", delta: "完成率 86.7%", deltaClass: "up", icon: "✅", color: "#8b5cf6" },
+  { title: "本月费用消耗", value: "¥2.4", unit: "万", delta: "预算余量 38%", deltaClass: "up", icon: "💳", color: "#ef4444" }
 ];
 
 export const dashboardWorkflows = [
   { id: 1, name: "品牌内容矩阵生产", detail: "图文 × 8 · 短视频脚本 × 3 · 已分发至各平台", agent: "AI品牌营销经理", progress: 100, status: "done" },
-  { id: 2, name: "海外投流策略执行", detail: "Meta Ads + TikTok · 预算 ¥8,000 · 投放中", agent: "AI广告投流专员", progress: 45, status: "running" },
-  { id: 3, name: "客户满意度回访", detail: "已回访 28/45 位客户 · 满意度 4.7/5", agent: "AI客服主管", progress: 62, status: "running" }
+  { id: 2, name: "海外投流策略执行", detail: "Meta Ads + TikTok · 预算 ¥8,000 · 投放中", agent: "AI跨境运营经理", progress: 62, status: "running" },
+  { id: 3, name: "竞品社媒数据分析", detail: "采集 15 个竞品账号 · 生成对标报告", agent: "AI数据分析师", progress: 45, status: "running" },
+  { id: 4, name: "客服响应优化 & 培训", detail: "待上一步完成后启动 · 预计 14:00", agent: "AI客服主管", progress: 0, status: "pending" }
 ];
 
 export const dashboardTasks = [
-  { id: 1, title: "生成品牌出海内容包（英文版）", agent: "AI品牌营销经理", tag: "营销", tagClass: "marketing", progress: 65, status: "running" },
-  { id: 2, title: "分析上周亚马逊广告数据", agent: "AI数据分析师", tag: "数据", tagClass: "data", progress: 100, status: "done" },
-  { id: 3, title: "回复30条海外用户询盘", agent: "AI客服主管", tag: "客服", tagClass: "service", progress: 40, status: "running" },
-  { id: 4, title: "竞品定价分析报告", agent: "AI跨境运营经理", tag: "运营", tagClass: "ops", progress: 0, status: "pending" },
-  { id: 5, title: "社媒内容排期（TikTok×7条）", agent: "AI内容创作官", tag: "营销", tagClass: "marketing", progress: 80, status: "running" }
+  { id: 1, title: "生成品牌英文介绍视频脚本", tag: "营销", tagClass: "marketing", time: "09:15", progress: 100, statusClass: "done", progressText: "100%", statusText: "已完成" },
+  { id: 2, title: "分析竞品社媒数据，产出报告", tag: "数据", tagClass: "data", time: "10:30", progress: 45, statusClass: "running", progressText: "45%", statusText: "运行中" },
+  { id: 3, title: "制作本周客服培训话术表格", tag: "客服", tagClass: "service", time: "11:00", progress: 100, statusClass: "done", progressText: "100%", statusText: "已完成" },
+  { id: 4, title: "海外投流计划调整 & 出价优化", tag: "运营", tagClass: "ops", time: "13:00", progress: 62, statusClass: "running", progressText: "62%", statusText: "执行中" },
+  { id: 5, title: "月度用户增长数据汇总", tag: "数据", tagClass: "data", time: "15:00", progress: 0, statusClass: "pending", progressText: "—", statusText: "待分配" }
 ];
 
 export const dashboardAgents = [
-  { id: 1, name: "AI品牌营销经理", role: "Brand Marketing Manager", score: 92, status: "running", todayDone: 5, monthTotal: 42, satisfaction: 4.8 },
-  { id: 2, name: "AI广告投流专员", role: "Media Buying Specialist", score: 90, status: "running", todayDone: 5, monthTotal: 38, satisfaction: 4.6 },
-  { id: 3, name: "AI客服主管", role: "Customer Service Lead", score: 96, status: "running", todayDone: 28, monthTotal: 156, satisfaction: 4.9 },
-  { id: 4, name: "AI数据分析师", role: "Data Analyst", score: 94, status: "running", todayDone: 3, monthTotal: 28, satisfaction: 4.7 }
+  { id: 1, name: "AI品牌营销经理", role: "Brand Marketing", score: 92, statusClass: "running", statusText: "工作中", statusTextColor: "var(--accent)", scoreColor: "var(--accent)", todayDone: "5/5", kpiGrade: "A+", kpiColor: "var(--green)", cost: "¥1,200", tools: "文本/视频", avatarGradient: "linear-gradient(135deg, #3b82f6, #8b5cf6)", avatarChar: "品" },
+  { id: 2, name: "AI跨境运营经理", role: "Cross-border Ops", score: 88, statusClass: "running", statusText: "工作中", statusTextColor: "var(--accent)", scoreColor: "var(--accent2)", todayDone: "3/4", kpiGrade: "B+", kpiColor: "var(--yellow)", cost: "¥8,000", tools: "投流/分析", avatarGradient: "linear-gradient(135deg, #06b6d4, #3b82f6)", avatarChar: "运" },
+  { id: 3, name: "AI客服主管", role: "Customer Service", score: 96, statusClass: "pending", statusText: "待命中", statusTextColor: "var(--text3)", scoreColor: "var(--green)", todayDone: "28/35", kpiGrade: "A+", kpiColor: "var(--green)", cost: "¥560", tools: "表格/文本", avatarGradient: "linear-gradient(135deg, #8b5cf6, #ec4899)", avatarChar: "客" },
+  { id: 4, name: "AI数据分析师", role: "Data Analyst", score: 90, statusClass: "running", statusText: "分析中", statusTextColor: "var(--accent)", scoreColor: "var(--yellow)", todayDone: "2/3", kpiGrade: "A", kpiColor: "var(--green)", cost: "¥380", tools: "数据/报告", avatarGradient: "linear-gradient(135deg, #f59e0b, #ef4444)", avatarChar: "数" }
 ];
 
 export const dashboardCosts = [
-  { name: "广告投放", amt: "¥8,200", pct: "34%", color: "#3b82f6", width: 68 },
-  { name: "AI算力", amt: "¥5,600", pct: "23%", color: "#8b5cf6", width: 46 },
-  { name: "API调用", amt: "¥4,100", pct: "17%", color: "#06b6d4", width: 34 },
-  { name: "内容审核", amt: "¥3,500", pct: "15%", color: "#10b981", width: 29 },
-  { name: "数据存储", amt: "¥2,600", pct: "11%", color: "#f59e0b", width: 22 }
+  { name: "投流费用", icon: "🚀", amt: "¥16,000", pct: "66%", color: "#3b82f6", width: 80 },
+  { name: "算力费用", icon: "⚡", amt: "¥4,800", pct: "20%", color: "#8b5cf6", width: 25 },
+  { name: "工具调用", icon: "🛠", amt: "¥2,140", pct: "9%", color: "#06b6d4", width: 12 },
+  { name: "模型Token", icon: "🤖", amt: "¥1,200", pct: "5%", color: "#10b981", width: 5 }
 ];
 
 export const dashboardTools = [
-  { name: "AI多语言文案", calls: 186, barWidth: 62, icon: "文", bg: "rgba(59,130,246,0.15)" },
-  { name: "AI客服回复", calls: 145, barWidth: 48, icon: "客", bg: "rgba(6,182,212,0.15)" },
-  { name: "AI短视频脚本", calls: 98, barWidth: 33, icon: "影", bg: "rgba(139,92,246,0.15)" },
-  { name: "AI广告优化", calls: 72, barWidth: 24, icon: "投", bg: "rgba(245,158,11,0.15)" }
+  { name: "文本创造", calls: 48, barWidth: 100, icon: "✍️", bg: "rgba(59,130,246,0.15)" },
+  { name: "制定表格", calls: 25, barWidth: 52, icon: "📊", bg: "rgba(16,185,129,0.15)" },
+  { name: "制作视频", calls: 12, barWidth: 25, icon: "🎬", bg: "rgba(139,92,246,0.15)" },
+  { name: "数据分析", calls: 17, barWidth: 35, icon: "📈", bg: "rgba(245,158,11,0.15)" }
 ];
 
 export const dashboardResults = [
-  { title: "AI内容生成", big: "186", sub: "条 · 本周产出", rc: "rgba(59,130,246,0.12)", bars: [8,12,16,18,22,28,32], trend: "+24%", trendUp: true },
-  { title: "广告投放优化", big: "¥60.8K", sub: "本周GMV · ROI 3.8x", rc: "rgba(16,185,129,0.12)", bars: [12,18,22,28,24,32,38], input: "¥16K", output: "¥60.8K" },
-  { title: "客户服务统计", big: "4.9", sub: "平均满意度 · 本月", rc: "rgba(139,92,246,0.12)", bars: [28,32,30,38,40,44,48], trend: "+0.2", trendUp: true }
+  { title: "📥 询盘线索总量", big: "312", sub: "较上周 +48 条 (+18%)", rc: "rgba(16,185,129,0.12)", bars: [50,60,45,75,65,80,100], trend: "+48条", trendUp: true, bigColor: "var(--green)" },
+  { title: "👤 新增用户", big: "1,840", sub: "本周累计 · 转化率 6.8%", rc: "rgba(59,130,246,0.12)", bars: [55,70,60,85,75,90,100], trend: "+210人", trendUp: true, bigColor: "var(--accent)" },
+  { title: "💹 投流 ROI", big: "3.8", unit: "x", sub: "目标 3.5x · 超出 0.3x ✓", rc: "rgba(245,158,11,0.12)", bars: [], trend: "+0.3x", trendUp: true, input: "¥16K", output: "¥60.8K", showInputOutput: true, bigColor: "var(--yellow)" }
 ];
 
 export const salesTrend = [

@@ -11,6 +11,7 @@ import { computed } from "vue";
 const props = defineProps({ data: { type: Array, required: true } });
 const total = computed(() => props.data.reduce((sum, item) => sum + item.value, 0));
 const gradient = computed(() => {
+  if (!props.data?.length || !total.value) return 'conic-gradient(#333 0% 100%)';
   let start = 0;
   return `conic-gradient(${props.data.map((item) => {
     const end = start + item.value / total.value * 100;

@@ -1,0 +1,1 @@
+import{o as a,c as n,a as e,t as s,J as o}from"./index-YFbtCmdb.js";const i={class:"panel"},c={class:"panel-head"},r={class:"panel-body"},u={__name:"AppPanel",props:{title:String,subtitle:String},setup(t){return(l,p)=>(a(),n("section",i,[e("div",c,[e("div",null,[e("h2",null,s(t.title),1),e("span",null,s(t.subtitle),1)])]),e("div",r,[o(l.$slots,"default")])]))}};export{u as A};
