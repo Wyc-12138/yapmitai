@@ -23,7 +23,7 @@
         <div class="hero-orb"></div>
         <div class="hero-badge"><span class="badge-dot"></span>AI Operating System · yapmitai.com</div>
         <h1>行业智能<br>从 <em>底座</em> 开始</h1>
-        <p class="hero-sub">YAPMIT AI OS 将大模型能力封装为垂直行业标准化工作流——品牌增长、跨境出海、导购文旅、招商引资，一套底座，四个行业空间。</p>
+        <p class="hero-sub">YAPMIT AI OS 将大模型能力封装为垂直行业标准化工作流——品牌增长、跨境出海、导购文旅、招商引资，一套底座，多个行业，无限空间。</p>
         <div class="hero-actions">
           <button type="button" class="btn-primary" @click="scrollToIndustry">探索行业空间</button>
           <button type="button" class="btn-ask" @click="askMeOpen = true">
