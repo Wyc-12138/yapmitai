@@ -23,6 +23,7 @@ def test_all_tables_compile_for_mysql() -> None:
         "ai_tools",
             "conversations",
             "growth_tasks",
+            "inquiry_records",
             "knowledge_bases",
         "knowledge_documents",
         "messages",

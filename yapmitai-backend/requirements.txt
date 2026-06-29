@@ -3,6 +3,7 @@ fastapi==0.115.9
 uvicorn[standard]==0.34.3
 pydantic-settings==2.9.1
 sqlalchemy==2.0.41
+greenlet>=3.0.0
 alembic==1.16.1
 aiomysql==0.2.0
 redis==6.2.0

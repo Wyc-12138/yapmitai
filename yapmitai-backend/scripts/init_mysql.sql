@@ -323,3 +323,25 @@ CREATE TABLE IF NOT EXISTS `messages` (
   DEFAULT CHARACTER SET=utf8mb4
   COLLATE=utf8mb4_unicode_ci
   COMMENT='会话消息';
+
+-- ============================================================
+-- 11. 询盘 AI 历史记录
+-- 保存三大 Agent 的分析步骤与汇总结果。
+-- ============================================================
+CREATE TABLE IF NOT EXISTS `inquiry_records` (
+    `id` VARCHAR(60) NOT NULL COMMENT '询盘记录 ID',
+    `inquiry_text` TEXT NOT NULL COMMENT '原始询盘文本',
+    `source` VARCHAR(60) NOT NULL DEFAULT 'WhatsApp' COMMENT '询盘来源',
+    `sample_label` VARCHAR(80) NULL COMMENT '演示样例标签',
+    `status` VARCHAR(40) NOT NULL DEFAULT 'done' COMMENT '处理状态',
+    `steps` JSON NOT NULL COMMENT '三个 Agent 输出步骤',
+    `summary` JSON NOT NULL COMMENT '汇总结果',
+    `error_message` TEXT NULL COMMENT '错误信息',
+    `created_at` DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) COMMENT '创建时间',
+    PRIMARY KEY (`id`),
+    KEY `ix_inquiry_records_status` (`status`),
+    KEY `ix_inquiry_records_created_at` (`created_at`)
+) ENGINE=InnoDB
+  DEFAULT CHARACTER SET=utf8mb4
+  COLLATE=utf8mb4_unicode_ci
+  COMMENT='询盘 AI 历史记录';

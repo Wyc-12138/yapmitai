@@ -83,6 +83,26 @@ async def ensure_agent_schema() -> bool:
     return upgraded
 
 
+async def ensure_inquiry_schema() -> None:
+    if database_url.get_backend_name() != "mysql":
+        return
+    async with engine.begin() as connection:
+        rows = await connection.execute(
+            text(
+                "SELECT COLUMN_NAME FROM information_schema.COLUMNS "
+                "WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'inquiry_records'"
+            )
+        )
+        columns = {row[0] for row in rows}
+        if "sample_label" not in columns:
+            await connection.execute(
+                text(
+                    "ALTER TABLE inquiry_records "
+                    "ADD COLUMN sample_label VARCHAR(80) NULL COMMENT '演示样例标签'"
+                )
+            )
+
+
 async def init_database() -> None:
     from app.db.seed import seed_database
 
@@ -105,6 +125,7 @@ async def init_database() -> None:
 
         await connection.run_sync(remove_legacy_workflow_schema)
         await connection.run_sync(Base.metadata.create_all)
+    await ensure_inquiry_schema()
     agent_schema_upgraded = await ensure_agent_schema()
     async with AsyncSessionLocal() as session:
         await seed_database(session, seed_growth_agents=agent_schema_upgraded)

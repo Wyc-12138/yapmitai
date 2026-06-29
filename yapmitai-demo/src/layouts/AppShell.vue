@@ -148,6 +148,7 @@ const portals = {
       ]),
       group("business", "业务", "Business", "B", [
         comingSoon("数据分析", "Analytics", "A"),
+        item("/enterprise/inquiry", "询盘AI", "Inquiry AI", "I"),
         comingSoon("拓客中心", "Leads", "L"),
         comingSoon("报告", "Reports", "R"),
         item("/enterprise/billing", "成本中心", "Cost Center", "C")

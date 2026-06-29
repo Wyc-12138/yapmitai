@@ -17,6 +17,7 @@ export const portals = [
       { path: "/enterprise/model-configs", title: "模型配置", description: "配置Chat和Embedding模型。" },
       { path: "/enterprise/tools/agent-config", title: "Agent总配置", description: "管理网关、模块和连接测试。" },
       { path: "/enterprise/creation/agent", title: "AI创作配置", description: "配置图片、视频和内容生成能力。" },
+      { path: "/enterprise/inquiry", title: "询盘转化AI", description: "三大 Agent 处理询盘：分析、回复、跟进。" },
       { path: "/enterprise/tools/agent-logs", title: "调用日志", description: "查看接口、模型调用和异常。" }
     ]
   },
